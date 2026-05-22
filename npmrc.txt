@@ -1,0 +1,8 @@
+# Treat peer dependency conflicts as warnings, not fatal errors.
+# This prevents Vercel deploys from breaking when a transitive dependency
+# declares a peer range that doesn't perfectly intersect with ours.
+legacy-peer-deps=true
+
+# Don't pollute deploys with funding ads / audit noise
+fund=false
+audit=false
