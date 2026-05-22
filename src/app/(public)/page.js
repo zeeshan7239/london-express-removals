@@ -9,7 +9,7 @@ import CTABanner from '@/components/home/CTABanner';
 
 export const metadata = {
   title: 'Reliable Man & Van Service Across London',
-  description: 'Premium man & van removals in London. Instant pricing, fully insured, transparent fees. House moves, flats, offices, single items. Same-day service available.',
+  description: 'Premium man & van removals in London. Instant pricing, Fully secured, transparent fees. House moves, flats, offices, single items. Same-day service available.',
   alternates: { canonical: '/' },
 };
 

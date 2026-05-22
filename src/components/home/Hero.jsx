@@ -76,7 +76,7 @@ export default function Hero() {
                 <span className="font-bold">4.9</span>
                 <span className="text-ink-400">(2,400+ reviews)</span>
               </span>
-              <span className="flex items-center gap-1.5 text-ink-300"><Shield className="w-3.5 h-3.5 text-emerald-400" /> Fully insured</span>
+              <span className="flex items-center gap-1.5 text-ink-300"><Shield className="w-3.5 h-3.5 text-emerald-400" /> Fully secured</span>
               <span className="flex items-center gap-1.5 text-ink-300"><Clock className="w-3.5 h-3.5 text-ember-400" /> Same-day service</span>
             </motion.div>
           </div>

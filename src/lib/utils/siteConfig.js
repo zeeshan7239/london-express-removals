@@ -10,6 +10,8 @@ export const siteConfig = {
   ogImage: '/og-image.jpg',
   phone: '+44 7459 180 023',
   phoneRaw: '+447459180023',
-  whatsapp: 'https://wa.me/447459180023',
+  whatsapp: `https://wa.me/447459180023?text=${encodeURIComponent(
+    'Hi, I need a quote for house removal. Please help me with pricing and availability.'
+  )}`,
   email: 'bookings@londonexpressremovals.co.uk',
 };

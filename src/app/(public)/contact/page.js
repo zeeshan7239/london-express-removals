@@ -42,6 +42,13 @@ export default function ContactPage() {
     }
   };
 
+  const phoneNumber = "447XXXXXXXXX"; // your UK number without +
+
+const message = "Hi, I need a quote for house removal. Please help me with pricing and availability.";
+
+const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+  message
+)}`;
   return (
     <>
       <PageHeader

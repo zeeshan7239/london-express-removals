@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Shield, Clock, Banknote, HeartHandshake, ArrowRight } from 'lucide-react';
 
 const features = [
-  { icon: Shield, title: 'Fully insured', desc: 'Goods-in-transit cover up to £10,000 on every move.' },
+  { icon: Shield, title: 'Fully secured', desc: 'Goods-in-transit cover up to £10,000 on every move.' },
   { icon: Clock, title: 'On time, every time', desc: 'Same-day quotes, punctual arrivals, no waiting.' },
   { icon: Banknote, title: 'Transparent pricing', desc: 'See your final price before booking — no surprises.' },
   { icon: HeartHandshake, title: 'Friendly movers', desc: 'Vetted, polite professionals who treat your stuff like their own.' },

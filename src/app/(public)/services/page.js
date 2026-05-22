@@ -8,7 +8,7 @@ import {
 
 export const metadata = {
   title: 'Removal Services',
-  description: 'Full range of professional moving services across London: house moves, flat moves, office relocations, single items, and storage runs. Fixed pricing, fully insured.',
+  description: 'Full range of professional moving services across London: house moves, flat moves, office relocations, single items, and storage runs. Fixed pricing, Fully secured.',
   alternates: { canonical: '/services' },
 };
 
