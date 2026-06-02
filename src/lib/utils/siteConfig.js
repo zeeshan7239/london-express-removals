@@ -14,5 +14,5 @@ export const siteConfig = {
     'Hi, I need a quote for house removal. Please help me with pricing and availability.'
   )}`,
   email: 'bookings@londonexpressremovals.co.uk',
-   googleVerification: "google79162e65c5ccd03c.html",  
+   googleVerification: "google79162e65c5ccd03c",  
 };
