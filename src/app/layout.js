@@ -62,7 +62,7 @@ const businessSchema = {
   name: siteConfig.name,
   image: `${siteConfig.url}${siteConfig.ogImage}`,
   '@id': siteConfig.url,
-  url: siteConfig.url,
+  url: "https://londonexpressremovals.co.uk",
   telephone: siteConfig.phone,
   email: siteConfig.email,
   priceRange: '££',
