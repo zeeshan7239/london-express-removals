@@ -15,9 +15,6 @@ export const metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  verification: {
-    google: siteConfig.googleVerification,
-  },
   keywords: [
     'man and van London', 'removals London', 'house removals UK',
     'office relocation London', 'flat moving', 'single item delivery',
@@ -46,11 +43,9 @@ export const metadata = {
   },
   alternates: { canonical: siteConfig.url },
   verification: {
-    // Add Google/Bing verification codes when you have them:
-    // google: 'your-google-verification',
+    google: siteConfig.googleVerification,
   },
 };
-
 export const viewport = {
   themeColor: '#0F172A',
   width: 'device-width',
