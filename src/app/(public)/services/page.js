@@ -6,12 +6,19 @@ import {
   Check, ArrowRight,
 } from 'lucide-react';
 
-export const metadata = {
-  title: 'Removal Services',
-  description: 'Full range of professional moving services across London: house moves, flat moves, office relocations, single items, and storage runs. Fixed pricing, Fully secured.',
-  alternates: { canonical: '/services' },
-};
 
+export const metadata = {
+  title: 'Removal Services London — House, Flat & Office Moves',
+  description:
+    'Professional removal services across London. House moves, flat moves, office relocations & single items. Fixed pricing, fully insured. Get an instant quote.',
+  alternates: {
+    canonical: '/services',
+  },
+  openGraph: {
+    title: 'Removal Services London — House, Flat & Office Moves',
+    url: '/services',
+  },
+};
 const services = [
   {
     id: 'studio',
@@ -62,8 +69,8 @@ export default function ServicesPage() {
     <>
       <PageHeader
         eyebrow="What we move"
-        title="Removal services for every London move"
-        subtitle="From a single sofa to a 4-bedroom house — we've got you covered with transparent pricing and insured, professional service."
+        title="Removal Services London — House, Flat & Office Moves | London Express Removals"
+        subtitle="Professional removal services across London. House moves, flat moves, office relocations & single items. Fixed pricing, fully Secured. Get an instant quote."
       />
 
       <section className="py-16 lg:py-20 bg-ink-50">

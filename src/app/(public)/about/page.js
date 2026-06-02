@@ -27,8 +27,8 @@ export default function AboutPage() {
     <>
       <PageHeader
         eyebrow="About us"
-        title="A friendlier kind of removal company"
-        subtitle="We started in 2017 with one van and a simple idea — make moving day genuinely less stressful for Londoners. We're still doing that today."
+        title="About Us — London's Trusted Man & Van Service | London Express Removals"
+        subtitle="Meet the team behind 10,000+ London moves. Fully secured, transparent pricing, same-day availability across all London boroughs."
       />
 
       <section className="py-16 lg:py-20">

@@ -53,8 +53,8 @@ const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
     <>
       <PageHeader
         eyebrow="Contact us"
-        title="We're here to help"
-        subtitle="Got a question, a special request, or just want to talk through your move? Reach us by phone, email, or WhatsApp — we usually reply within 15 minutes."
+        title="Contact London Express Removals — Get a Quote Today"
+        subtitle="Call, WhatsApp or email London Express Removals. Same-day quotes available. Covering all London and surrounding areas."
       />
 
       <section className="py-16 lg:py-20 bg-ink-50">

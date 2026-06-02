@@ -101,7 +101,7 @@ export default async function BlogPage() {
     <>
       <PageHeader
         eyebrow="Blog"
-        title="Moving tips, area guides & insights"
+        title="Moving Tips & London Area Guides | London Express Removals Blog"
         subtitle="Practical advice from the team that's moved 2,400+ Londoners."
       />
 
