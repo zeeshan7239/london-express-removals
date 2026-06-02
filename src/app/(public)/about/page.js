@@ -4,7 +4,7 @@ import { Truck, Award, Users, Heart } from 'lucide-react';
 
 export const metadata = {
   title: 'About Us',
-  description: 'Learn about London Express Removals — your trusted moving partner across London and the UK. Family-run, Fully secured, customer-obsessed.',
+  description: 'Learn about London Express Removals — your trusted moving partner across London and the UK. Family-run, trusted professionals, customer-obsessed.',
   alternates: { canonical: '/about' },
 };
 

@@ -70,7 +70,7 @@ export default function ServicesPage() {
       <PageHeader
         eyebrow="What we move"
         title="Removal Services London — House, Flat & Office Moves  London Express Removals"
-        subtitle="Professional removal services across London. House moves, flat moves, office relocations & single items. Fixed pricing, fully Secured. Get an instant quote."
+        subtitle="Professional removal services across London. House moves, flat moves, office relocations & single items. Fixed pricing, fully Professionals. Get an instant quote."
       />
 
       <section className="py-16 lg:py-20 bg-ink-50">
