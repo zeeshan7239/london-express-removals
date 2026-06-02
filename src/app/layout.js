@@ -15,6 +15,9 @@ export const metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  verification: {
+    google: siteConfig.googleVerification,
+  },
   keywords: [
     'man and van London', 'removals London', 'house removals UK',
     'office relocation London', 'flat moving', 'single item delivery',

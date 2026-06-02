@@ -3,18 +3,17 @@ import { connectDB } from '@/lib/db/connect';
 import Blog from '@/lib/models/Blog';
 
 export default async function sitemap() {
-  const base = [
-    { url: siteConfig.url, lastModified: new Date(), priority: 1.0 },
-    { url: `${siteConfig.url}/about`, lastModified: new Date(), priority: 0.8 },
-    { url: `${siteConfig.url}/services`, lastModified: new Date(), priority: 0.9 },
-    { url: `${siteConfig.url}/booking`, lastModified: new Date(), priority: 1.0 },
-    { url: `${siteConfig.url}/custom-quote`, lastModified: new Date(), priority: 0.8 },
-    { url: `${siteConfig.url}/blog`, lastModified: new Date(), priority: 0.7 },
-    { url: `${siteConfig.url}/contact`, lastModified: new Date(), priority: 0.7 },
-    { url: `${siteConfig.url}/terms`, lastModified: new Date(), priority: 0.3 },
-    { url: `${siteConfig.url}/privacy`, lastModified: new Date(), priority: 0.3 },
-  ];
-
+const base = [
+  { url: siteConfig.url, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
+  { url: `${siteConfig.url}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+  { url: `${siteConfig.url}/services`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9 },
+  { url: `${siteConfig.url}/booking`, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
+  { url: `${siteConfig.url}/custom-quote`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+  { url: `${siteConfig.url}/blog`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+  { url: `${siteConfig.url}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+  { url: `${siteConfig.url}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+  { url: `${siteConfig.url}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+];
   // Add blog posts dynamically. If DB is unreachable, just return base routes.
   try {
     await connectDB();
