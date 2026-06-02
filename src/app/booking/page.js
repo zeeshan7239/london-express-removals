@@ -309,7 +309,7 @@ export default function BookingPage() {
             <Sparkles className="w-3 h-3" /> Live Booking
           </div>
           <h1 className="heading-display text-3xl lg:text-5xl !text-white mb-2">Book your move</h1>
-          <p className="text-ink-300">Instant transparent pricing · M25 area · Insured up to £10k</p>
+          <p className="text-ink-300">Instant transparent pricing · M25 area · Secured and Safe</p>
         </div>
       </section>
 

@@ -48,7 +48,7 @@ export default function AuthShell({ title, subtitle, children }) {
           </p>
           <div className="space-y-4 max-w-md">
             {[
-              { icon: ShieldCheck, title: 'Insured up to £10k', desc: 'Standard on every move' },
+              { icon: ShieldCheck, title: 'Secured and Safe', desc: 'Standard on every move' },
               { icon: Users, title: 'Vetted movers', desc: 'Background-checked and trained' },
               { icon: Truck, title: 'Same-day available', desc: 'When you need to move fast' },
             ].map((b) => {
