@@ -101,8 +101,8 @@ export default async function BlogPage() {
     <>
       <PageHeader
         eyebrow="Blog"
-        title="Moving Tips & London Area Guides | London Express Removals Blog"
-        subtitle="Practical advice from the team that's moved 2,400+ Londoners."
+        title="Moving Tips & London Area Guides London Express Removals Blog"
+        subtitle="Practical moving advice from London's trusted man & van service — packing tips, area guides, cost-saving checklists and more."
       />
 
       <section className="py-20 lg:py-28">

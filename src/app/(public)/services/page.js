@@ -69,7 +69,7 @@ export default function ServicesPage() {
     <>
       <PageHeader
         eyebrow="What we move"
-        title="Removal Services London — House, Flat & Office Moves | London Express Removals"
+        title="Removal Services London — House, Flat & Office Moves  London Express Removals"
         subtitle="Professional removal services across London. House moves, flat moves, office relocations & single items. Fixed pricing, fully Secured. Get an instant quote."
       />
 
