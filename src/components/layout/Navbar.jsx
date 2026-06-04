@@ -1,27 +1,43 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Phone, Truck } from 'lucide-react';
+import { Menu, X, Phone, Truck, ChevronDown, MapPin } from 'lucide-react';
 import UserMenu from './UserMenu';
 import { siteConfig } from '@/lib/utils/siteConfig';
 
+const boroughs = [
+  { href: '/locations/camden',     label: 'Camden' },
+  { href: '/locations/hackney',    label: 'Hackney' },
+  { href: '/locations/islington',  label: 'Islington' },
+  { href: '/locations/wandsworth', label: 'Wandsworth' },
+  { href: '/locations/brixton',    label: 'Brixton' },
+  { href: '/locations/clapham',    label: 'Clapham' },
+  { href: '/locations/greenwich',  label: 'Greenwich' },
+  { href: '/locations/croydon',    label: 'Croydon' },
+  { href: '/locations/stratford',  label: 'Stratford' },
+  { href: '/locations/shoreditch', label: 'Shoreditch' },
+];
+
 const links = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
-  { href: '/services', label: 'Services' },
-  { href: '/booking', label: 'Booking', highlight: true },
+  { href: '/',             label: 'Home' },
+  { href: '/about',        label: 'About' },
+  { href: '/services',     label: 'Services' },
+  { href: '/booking',      label: 'Booking', highlight: true },
   { href: '/custom-quote', label: 'Custom Quote' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/blog',         label: 'Blog' },
+  { href: '/contact',      label: 'Contact' },
 ];
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const pathname = usePathname();
+  const [scrolled, setScrolled]         = useState(false);
+  const [mobileOpen, setMobileOpen]     = useState(false);
+  const [locationsOpen, setLocationsOpen] = useState(false);
+  const [mobileLocOpen, setMobileLocOpen] = useState(false);
+  const pathname  = usePathname();
+  const dropRef   = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -32,12 +48,27 @@ export default function Navbar() {
   // Close mobile menu on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
+  // Close desktop dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropRef.current && !dropRef.current.contains(e.target)) {
+        setLocationsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const isLocationsActive = pathname.startsWith('/locations');
+
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         scrolled ? 'bg-white/95 backdrop-blur-md shadow-soft' : 'bg-transparent'
       }`}>
         <div className="container-wide flex items-center justify-between h-16 lg:h-20">
+
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ink-900 to-ink-800 flex items-center justify-center shadow-pop group-hover:rotate-3 transition">
               <Truck className="w-5 h-5 text-ember-400" />
@@ -48,6 +79,7 @@ export default function Navbar() {
             </div>
           </Link>
 
+          {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-1">
             {links.map((l) => {
               const active = pathname === l.href || (l.href !== '/' && pathname.startsWith(l.href));
@@ -67,8 +99,59 @@ export default function Navbar() {
                 </Link>
               );
             })}
+
+            {/* Locations dropdown */}
+            <div className="relative" ref={dropRef}>
+              <button
+                onClick={() => setLocationsOpen((v) => !v)}
+                className={`flex items-center gap-1 px-3.5 py-2 rounded-full text-sm font-medium transition-all ${
+                  isLocationsActive
+                    ? 'bg-ink-900 text-white'
+                    : 'text-ink-600 hover:text-ink-900 hover:bg-ink-50'
+                }`}
+              >
+                Locations
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${locationsOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {locationsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white rounded-2xl shadow-pop border border-ink-100 overflow-hidden z-50"
+                  >
+                    <div className="px-3 pt-3 pb-1">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400 px-2 mb-1">
+                        London Boroughs
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-0.5 px-2 pb-2">
+                      {boroughs.map((b) => (
+                        <Link
+                          key={b.href}
+                          href={b.href}
+                          onClick={() => setLocationsOpen(false)}
+                          className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-medium transition ${
+                            pathname === b.href
+                              ? 'bg-ember-50 text-ember-600'
+                              : 'text-ink-700 hover:bg-ink-50 hover:text-ink-900'
+                          }`}
+                        >
+                          <MapPin className="w-3 h-3 text-ember-400 shrink-0" />
+                          {b.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </nav>
 
+          {/* Right side */}
           <div className="flex items-center gap-2 lg:gap-3">
             <a
               href={`tel:${siteConfig.phoneRaw}`}
@@ -112,10 +195,14 @@ export default function Navbar() {
               className="absolute top-0 right-0 bottom-0 w-72 bg-white shadow-pop p-6 overflow-y-auto"
             >
               <div className="flex justify-end mb-4">
-                <button onClick={() => setMobileOpen(false)} className="w-10 h-10 rounded-xl bg-ink-50 flex items-center justify-center">
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="w-10 h-10 rounded-xl bg-ink-50 flex items-center justify-center"
+                >
                   <X className="w-5 h-5" />
                 </button>
               </div>
+
               <nav className="flex flex-col gap-1">
                 {links.map((l) => (
                   <Link
@@ -128,6 +215,49 @@ export default function Navbar() {
                     {l.label}
                   </Link>
                 ))}
+
+                {/* Mobile locations accordion */}
+                <button
+                  onClick={() => setMobileLocOpen((v) => !v)}
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-sm transition ${
+                    isLocationsActive ? 'bg-ink-900 text-white' : 'text-ink-700 hover:bg-ink-50'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4" /> Locations
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${mobileLocOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {mobileLocOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="grid grid-cols-2 gap-1 pl-3 pb-1">
+                        {boroughs.map((b) => (
+                          <Link
+                            key={b.href}
+                            href={b.href}
+                            className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-medium transition ${
+                              pathname === b.href
+                                ? 'bg-ember-50 text-ember-600'
+                                : 'text-ink-600 hover:bg-ink-50'
+                            }`}
+                          >
+                            <MapPin className="w-3 h-3 text-ember-400 shrink-0" />
+                            {b.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <Link href="/booking" className="btn-primary mt-3 justify-center">Book your move</Link>
                 <a href={`tel:${siteConfig.phoneRaw}`} className="btn-ghost mt-2 justify-center">
                   <Phone className="w-4 h-4" /> Call us
