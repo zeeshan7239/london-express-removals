@@ -1,10 +1,12 @@
 import PageHeader from '@/components/common/PageHeader';
 
 export const metadata = {
-  title: 'Terms of Service',
-  description: 'Terms of service for London Express Removals.',
+  title: 'Terms of Service | London Express Removals',
+  description: 'Terms and conditions for London Express Removals. Booking, cancellation, pricing, insurance and liability terms.',
   alternates: { canonical: '/terms' },
+  robots: { index: false, follow: false }, // no SEO value — exclude from index
 };
+
 
 export default function TermsPage() {
   return (

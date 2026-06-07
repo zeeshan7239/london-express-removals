@@ -3,8 +3,14 @@ import Footer from '@/components/layout/Footer';
 import FloatingButtons from '@/components/layout/FloatingButtons';
 
 export const metadata = {
-  title: 'Book Your Move — Instant Pricing',
-  description: 'Book your London move in minutes. Instant transparent pricing for moves inside the M25. Insured, professional, no hidden fees.',
+  title: 'Book a Removal — Instant Online Pricing | London Express Removals',
+  description: 'Book your London removal in minutes. Instant transparent pricing for house moves, flat moves, office relocations and man & van services across all London boroughs. No deposit, no hidden fees.',
+  alternates: { canonical: '/booking' },
+  openGraph: {
+    title: 'Book a Removal — Instant Online Pricing | London Express Removals',
+    description: 'Book your London removal in minutes. Instant pricing, no deposit, no hidden fees. Covering all London boroughs.',
+    url: '/booking',
+  },
 };
 
 export default function BookingLayout({ children }) {

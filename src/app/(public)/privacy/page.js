@@ -1,9 +1,10 @@
 import PageHeader from '@/components/common/PageHeader';
 
 export const metadata = {
-  title: 'Privacy Policy',
-  description: 'Privacy policy for London Express Removals.',
+  title: 'Privacy Policy | London Express Removals',
+  description: 'Privacy policy for London Express Removals. How we collect, use and protect your personal data in accordance with UK GDPR.',
   alternates: { canonical: '/privacy' },
+  robots: { index: false, follow: false }, // no SEO value — exclude from index
 };
 
 export default function PrivacyPage() {

@@ -3,9 +3,14 @@ import CTABanner from '@/components/home/CTABanner';
 import { Truck, Award, Users, Heart } from 'lucide-react';
 
 export const metadata = {
-  title: 'About Us',
-  description: 'Learn about London Express Removals — your trusted moving partner across London and the UK. Family-run, trusted professionals, customer-obsessed.',
+  title: 'About Us — London\'s Trusted Man & Van Service | London Express Removals',
+  description: 'Meet the team behind 10,000+ London moves. London Express Removals is a professional, fully insured removal company covering all London boroughs. Transparent pricing, same-day availability, 4.9/5 rated.',
   alternates: { canonical: '/about' },
+  openGraph: {
+    title: 'About Us — London\'s Trusted Man & Van Service | London Express Removals',
+    description: 'Meet the team behind 10,000+ London moves. Fully insured, transparent pricing, same-day availability across all London boroughs.',
+    url: '/about',
+  },
 };
 
 const stats = [

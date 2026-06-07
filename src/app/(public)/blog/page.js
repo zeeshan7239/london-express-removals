@@ -19,10 +19,16 @@ import Blog from '@/lib/models/Blog';
 export const revalidate = 300;
 
 export const metadata = {
-  title: 'Blog — Moving Tips & Guides',
-  description: 'Practical advice for moving in London. Packing tips, area guides, and stress-free moving checklists from the team that\'s moved thousands of Londoners.',
+  title: 'Moving Tips & London Area Guides | London Express Removals Blog',
+  description: 'Practical moving advice from London\'s trusted removal service. Packing tips, borough area guides, cost-saving checklists, and expert advice for stress-free moves across London.',
   alternates: { canonical: '/blog' },
+  openGraph: {
+    title: 'Moving Tips & London Area Guides | London Express Removals Blog',
+    description: 'Practical moving advice from London\'s trusted removal service — packing tips, area guides, cost-saving checklists and more.',
+    url: '/blog',
+  },
 };
+
 
 // Fallback blogs so the page is never empty before the admin adds any real posts.
 // These match the SPA design with the gradient cover cards.

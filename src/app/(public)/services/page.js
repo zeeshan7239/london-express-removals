@@ -6,19 +6,17 @@ import {
   Check, ArrowRight,
 } from 'lucide-react';
 
-
 export const metadata = {
-  title: 'Removal Services London — House, Flat & Office Moves',
-  description:
-    'Professional removal services across London. House moves, flat moves, office relocations & single items. Fixed pricing, fully insured. Get an instant quote.',
-  alternates: {
-    canonical: '/services',
-  },
+  title: 'Removal Services London — House, Flat & Office Moves | London Express Removals',
+  description: 'Professional removal services across all London boroughs. House moves, flat moves, studio moves, office relocations, single-item delivery and storage runs. Fixed pricing from £100, same-day available. Get an instant quote.',
+  alternates: { canonical: '/services' },
   openGraph: {
-    title: 'Removal Services London — House, Flat & Office Moves',
+    title: 'Removal Services London — House, Flat & Office Moves | London Express Removals',
+    description: 'Professional removal services across all London boroughs. Fixed pricing from £100, same-day available. House, flat, office, single-item and storage moves.',
     url: '/services',
   },
 };
+
 const services = [
   {
     id: 'studio',

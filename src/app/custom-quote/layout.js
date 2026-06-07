@@ -3,8 +3,14 @@ import Footer from '@/components/layout/Footer';
 import FloatingButtons from '@/components/layout/FloatingButtons';
 
 export const metadata = {
-  title: 'Request a Custom Quote',
-  description: 'Complex move, outside the M25, or special requirements? Request a custom quote and we\'ll come back within 30 minutes.',
+  title: 'Request a Custom Removal Quote | London Express Removals',
+  description: 'Need a quote for a complex move, long-distance removal, or special requirements? Request a custom quote from London Express Removals — we respond within 30 minutes, 7 days a week.',
+  alternates: { canonical: '/custom-quote' },
+  openGraph: {
+    title: 'Request a Custom Removal Quote | London Express Removals',
+    description: 'Complex move or outside the M25? Request a custom quote — we respond within 30 minutes, 7 days a week.',
+    url: '/custom-quote',
+  },
 };
 
 export default function CustomQuoteLayout({ children }) {
