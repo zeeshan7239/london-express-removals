@@ -39,6 +39,7 @@ const FALLBACK_BLOGS = [
     excerpt: 'A practical, no-fluff checklist to make your London move easier — from the first box to the last.',
     category: 'Moving Tips', createdAt: '2024-09-12', readTime: '6 min read',
     coverGradient: 'from-ember-400 to-ember-600',
+    coverImage:"https://burkeandwills.co.uk/wp-content/uploads/2023/09/burke_wills-265-scaled.jpg"
   },
   {
     _id: 'fb-2', slug: 'packing-fragile-items-the-right-way',
