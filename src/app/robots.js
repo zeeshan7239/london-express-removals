@@ -6,9 +6,19 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/sign-in', '/sign-up', '/forgot-password', '/reset-password', '/admin', '/api'],
+        disallow: [
+          '/sign-in',
+          '/sign-up',
+          '/forgot-password',
+          '/reset-password',
+          '/admin',
+          '/api/',
+          '/dashboard',
+          '/_next/',
+        ],
       },
     ],
     sitemap: `${siteConfig.url}/sitemap.xml`,
+    host: siteConfig.url,
   };
 }
