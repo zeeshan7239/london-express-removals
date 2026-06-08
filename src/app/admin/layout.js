@@ -4,14 +4,15 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, Inbox, Truck, LogOut, ChevronRight, Loader2,
+  LayoutDashboard, Inbox, Truck, LogOut, ChevronRight, Loader2, BookOpen,
 } from 'lucide-react';
 import { useAuth } from '@/components/common/AuthContext';
 import toast from 'react-hot-toast';
 
 const nav = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin',       label: 'Dashboard',        icon: LayoutDashboard },
   { href: '/admin/quotes', label: 'Quotes & Bookings', icon: Inbox },
+  { href: '/admin/blog',   label: 'Blog Posts',        icon: BookOpen },
 ];
 
 export default function AdminLayout({ children }) {
