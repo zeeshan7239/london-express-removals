@@ -10,11 +10,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tailwindcss/typography": "^0.5.20",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "framer-motion": "^11.11.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.456.0",
+    "marked": "^18.0.5",
     "mongoose": "^8.8.0",
     "next": "^15.0.0",
     "nodemailer": "^6.9.16",
