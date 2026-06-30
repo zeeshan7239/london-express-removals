@@ -268,7 +268,7 @@ export default function BlogForm({ initial = {}, isEdit = false }) {
                   maxLength={180}
                   className="w-full px-3 py-2.5 rounded-xl border border-ink-200 text-sm resize-none focus:outline-none focus:border-ember-400"
                 />
-                <p className="text-xs text-ink-400 mt-1">{form.metaDescription.length}/160 characters</p>
+                <p className="text-xs text-ink-400 mt-1">{form.metaDescription.length}/180 characters</p>
               </div>
             </div>
 
