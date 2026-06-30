@@ -2,17 +2,22 @@
  * Location data for borough-specific SEO landing pages.
  * Each entry generates a page at /locations/[slug]
  * Covers all 33 London boroughs + key areas
+ *
+ * UPDATED June 2026:
+ * All title and description fields now follow the
+ * "Removals [Borough] — Man & Van [Postcode] from £[Price]" pattern
+ * based on Search Console data showing "removals [borough]"
+ * as the highest-impression query pattern.
  */
 export const locations = [
-  // ── EXISTING 10 ──────────────────────────────────────────────
   {
     slug: 'camden',
     name: 'Camden',
-    title: 'Man & Van Camden — Removals in Camden Town, NW1',
-    description: 'Professional man and van service in Camden, NW1. House moves, flat moves, office relocations across Camden Town, Kentish Town, Chalk Farm and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Camden — Man & Van NW1 from £100 | London Express Removals',
+    description: 'Removals in Camden from £100. House moves, flat moves and man & van service across Camden Town, Kentish Town, Chalk Farm and NW1. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Camden',
-      title: 'Man & Van Camden — Fast, Reliable Removals in NW1',
+      title: 'Removals Camden — Fast, Reliable Man & Van in NW1',
       subtitle: 'Trusted removal service across Camden Town, Kentish Town, Chalk Farm and Primrose Hill. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Camden is one of London's most densely packed boroughs, with a mix of Victorian terraces, mansion blocks, and modern apartments. Our team knows the area inside out — from the narrow streets around Camden Market to the converted warehouses near Regent's Canal. We handle parking logistics, congestion zone planning, and tight stairwells so your move runs smoothly.",
@@ -28,11 +33,11 @@ export const locations = [
   {
     slug: 'hackney',
     name: 'Hackney',
-    title: 'Man & Van Hackney — Removals in Hackney, E8',
-    description: 'Professional man and van and removal service in Hackney, E8. House moves, flat moves and office relocations across Hackney, Dalston, Stoke Newington, Homerton and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Hackney — Man & Van E8 from £100 | London Express Removals',
+    description: 'Removals in Hackney from £100. House moves, flat moves and man & van service across Hackney, Dalston, Stoke Newington and E8. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Hackney',
-      title: 'Man & Van Hackney — Reliable Removals in E8',
+      title: 'Removals Hackney — Reliable Man & Van in E8',
       subtitle: 'Trusted removal service across Hackney, Dalston, Stoke Newington and Homerton. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Hackney is one of London's most vibrant boroughs, with everything from Victorian terraces in Stoke Newington to modern warehouse conversions in Dalston. Our team regularly moves residents and businesses across E8, E9, and N16. We know the parking restrictions on Kingsland Road, the tricky access in Hackney's converted warehouses, and the best routes in and out of the borough.",
@@ -48,11 +53,11 @@ export const locations = [
   {
     slug: 'islington',
     name: 'Islington',
-    title: 'Man & Van Islington — Removals in Islington, N1',
-    description: 'Professional man and van service in Islington, N1. House moves, flat moves, office relocations across Angel, Highbury, Canonbury and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Islington — Man & Van N1 from £100 | London Express Removals',
+    description: 'Removals in Islington from £100. House moves, flat moves and man & van service across Angel, Highbury, Canonbury and N1. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Islington',
-      title: 'Man & Van Islington — Trusted Removals in N1',
+      title: 'Removals Islington — Trusted Man & Van in N1',
       subtitle: 'Reliable removal service across Angel, Highbury, Canonbury and Barnsbury. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Islington is one of London's most sought-after postcodes, with beautiful Georgian terraces, period conversions, and modern apartments around Angel and Highbury. Our team handles everything from fourth-floor mansion block moves to large Georgian townhouses. We know the parking suspension process with Islington Council and plan routes to avoid the busy A1 corridor on moving day.",
@@ -68,11 +73,11 @@ export const locations = [
   {
     slug: 'wandsworth',
     name: 'Wandsworth',
-    title: 'Man & Van Wandsworth — Removals in Wandsworth, SW18',
-    description: 'Professional man and van and removal service in Wandsworth, SW18. House moves, flat moves, office relocations across Wandsworth, Tooting, Balham, Earlsfield and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Wandsworth — Man & Van SW18 from £100 | London Express Removals',
+    description: 'Removals in Wandsworth from £100. House moves, flat moves and man & van service across Wandsworth, Tooting, Balham and SW18. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Wandsworth',
-      title: 'Man & Van Wandsworth — Reliable Removals in SW18',
+      title: 'Removals Wandsworth — Reliable Man & Van in SW18',
       subtitle: 'Trusted removal service across Wandsworth, Tooting, Balham and Earlsfield. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Wandsworth is one of London's largest boroughs, stretching from the riverside at Battersea to the leafy streets of Balham and Tooting. Whether you're moving from a riverside apartment near Wandsworth Bridge or a family home in Earlsfield, our team handles it all. We regularly operate across SW11, SW12, SW17, and SW18 postcodes.",
@@ -88,11 +93,11 @@ export const locations = [
   {
     slug: 'brixton',
     name: 'Brixton',
-    title: 'Man & Van Brixton — Removals in Brixton, SW9',
-    description: 'Professional man and van service in Brixton, SW9. House moves, flat moves, office relocations across Brixton, Stockwell, Streatham and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Brixton — Man & Van SW9 from £100 | London Express Removals',
+    description: 'Removals in Brixton from £100. House moves, flat moves and man & van service across Brixton, Stockwell, Streatham and SW9. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Brixton',
-      title: 'Man & Van Brixton — Fast Removals in SW9',
+      title: 'Removals Brixton — Fast Man & Van in SW9',
       subtitle: 'Trusted removal service across Brixton, Stockwell, Streatham and Herne Hill. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Brixton is a vibrant, fast-changing part of South London with a mix of Victorian terraces, mansion blocks, and new-build developments. We regularly move residents and businesses across SW2, SW9, and SW16. Our team knows the busy streets around Brixton Market, the one-way systems near Stockwell, and the best approach routes for moving vans throughout the area.",
@@ -108,11 +113,11 @@ export const locations = [
   {
     slug: 'clapham',
     name: 'Clapham',
-    title: 'Man & Van Clapham — Removals in Clapham, SW4',
-    description: 'Professional man and van service in Clapham, SW4. House moves, flat moves, office relocations across Clapham, Clapham Common, Clapham North and South. Instant pricing, same-day available.',
+    title: 'Removals Clapham — Man & Van SW4 from £100 | London Express Removals',
+    description: 'Removals in Clapham from £100. House moves, flat moves and man & van service across Clapham Common, Clapham North, Clapham South and SW4. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Clapham',
-      title: 'Man & Van Clapham — Reliable Removals in SW4',
+      title: 'Removals Clapham — Reliable Man & Van in SW4',
       subtitle: 'Trusted removal service across Clapham Common, Clapham North, Clapham South and Old Town. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Clapham is one of South London's most popular areas for young professionals and families, with beautiful period conversions around the Common and a lively high street. Our team regularly moves residents across SW4 and SW11, handling everything from second-floor flat moves to large Victorian semi-detached homes. We know the parking restrictions around Clapham Common and the best routes for moving vans through the area.",
@@ -128,11 +133,11 @@ export const locations = [
   {
     slug: 'greenwich',
     name: 'Greenwich',
-    title: 'Man & Van Greenwich — Removals in Greenwich, SE10',
-    description: 'Professional man and van service in Greenwich, SE10. House moves, flat moves, office relocations across Greenwich, Blackheath, Deptford and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Greenwich — Man & Van SE10 from £100 | London Express Removals',
+    description: 'Removals in Greenwich from £100. House moves, flat moves and man & van service across Greenwich, Blackheath, Deptford and SE10. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Greenwich',
-      title: 'Man & Van Greenwich — Trusted Removals in SE10',
+      title: 'Removals Greenwich — Trusted Man & Van in SE10',
       subtitle: 'Reliable removal service across Greenwich, Blackheath, Deptford and Lewisham. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Greenwich is a historic riverside borough with a mix of Georgian townhouses in Blackheath, riverside apartments near Greenwich Pier, and modern developments in Deptford. Our team regularly operates across SE10, SE3, and SE8. We plan routes carefully around Greenwich town centre's one-way systems and can advise on parking near the riverside developments.",
@@ -148,11 +153,11 @@ export const locations = [
   {
     slug: 'croydon',
     name: 'Croydon',
-    title: 'Man & Van Croydon — Removals in Croydon, CR0',
-    description: 'Professional man and van service in Croydon, CR0. House moves, flat moves, office relocations across Croydon, South Croydon, Purley and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Croydon — Man & Van CR0 from £100 | London Express Removals',
+    description: 'Removals in Croydon from £100. House moves, flat moves and man & van service across Croydon, South Croydon, Purley and CR0. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Croydon',
-      title: 'Man & Van Croydon — Reliable Removals in CR0',
+      title: 'Removals Croydon — Reliable Man & Van in CR0',
       subtitle: 'Trusted removal service across Croydon, South Croydon, Purley and Thornton Heath. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Croydon is one of South London's largest and most diverse areas, with a mix of high-rise apartments in the town centre, Victorian terraces in South Croydon, and larger family homes in Purley and Coulsdon. Our team covers all CR postcodes and knows the area well — including the tram routes to avoid and the best loading zones near the town centre.",
@@ -168,11 +173,11 @@ export const locations = [
   {
     slug: 'stratford',
     name: 'Stratford',
-    title: 'Man & Van Stratford — Removals in Stratford, E15',
-    description: 'Professional man and van service in Stratford, E15. House moves, flat moves, office relocations across Stratford, West Ham, Forest Gate and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Stratford — Man & Van E15 from £100 | London Express Removals',
+    description: 'Removals in Stratford from £100. House moves, flat moves and man & van service across Stratford, West Ham, Forest Gate and E15. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Stratford',
-      title: 'Man & Van Stratford — Fast Removals in E15',
+      title: 'Removals Stratford — Fast Man & Van in E15',
       subtitle: 'Trusted removal service across Stratford, West Ham, Forest Gate and Leyton. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Stratford has transformed dramatically since the 2012 Olympics, with a wave of new apartment buildings, mixed-use developments, and an expanding population. Our team regularly moves residents across E15, E7, and E13 — from the high-rise apartments in the International Quarter to family homes in Forest Gate. We know the loading restrictions around Stratford Centre and the best access routes for the newer developments.",
@@ -188,11 +193,11 @@ export const locations = [
   {
     slug: 'shoreditch',
     name: 'Shoreditch',
-    title: 'Man & Van Shoreditch — Removals in Shoreditch, E1',
-    description: 'Professional man and van service in Shoreditch, E1. House moves, flat moves, office relocations across Shoreditch, Hoxton, Bethnal Green and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Shoreditch — Man & Van E1 from £100 | London Express Removals',
+    description: 'Removals in Shoreditch from £100. House moves, flat moves and man & van service across Shoreditch, Hoxton, Bethnal Green and E1. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Shoreditch',
-      title: 'Man & Van Shoreditch — Reliable Removals in E1',
+      title: 'Removals Shoreditch — Reliable Man & Van in E1',
       subtitle: 'Trusted removal service across Shoreditch, Hoxton, Bethnal Green and Spitalfields. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Shoreditch and the surrounding Tech City area is home to a mix of warehouse conversions, new-build apartments, and creative office spaces. Our team regularly moves residents and businesses across E1, E2, and N1 — handling everything from large warehouse flat conversions to small office relocations on Old Street. We know the parking restrictions, loading zones, and access points throughout the area.",
@@ -205,16 +210,14 @@ export const locations = [
     ],
     postcode: 'E1',
   },
-
-  // ── NEW BOROUGHS ──────────────────────────────────────────────
   {
     slug: 'romford',
     name: 'Romford',
-    title: 'Man & Van Romford — Removals in Romford, RM1',
-    description: 'Professional man and van service in Romford, RM1. House moves, flat moves, office relocations across Romford, Hornchurch, Upminster and surrounding Havering areas. Instant pricing, same-day available.',
+    title: 'Removals Romford — Man & Van RM1 from £100 | London Express Removals',
+    description: 'Removals in Romford from £100. House moves, flat moves and man & van service across Romford, Hornchurch, Upminster and RM1. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Romford',
-      title: 'Man & Van Romford — Reliable Removals in RM1',
+      title: 'Removals Romford — Reliable Man & Van in RM1',
       subtitle: 'Trusted removal service across Romford, Hornchurch, Upminster and Harold Wood. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Romford is the main town in the London Borough of Havering, sitting on the eastern edge of London with excellent access to the M25. It's a mix of family homes, new-build developments, and traditional terraces. Our team regularly covers all RM postcodes, from Romford town centre to the quieter residential streets of Upminster and Hornchurch.",
@@ -230,11 +233,11 @@ export const locations = [
   {
     slug: 'barking',
     name: 'Barking',
-    title: 'Man & Van Barking — Removals in Barking & Dagenham, IG11',
-    description: 'Professional man and van service in Barking, IG11. House moves, flat moves, office relocations across Barking, Dagenham, Ilford and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Barking — Man & Van IG11 from £100 | London Express Removals',
+    description: 'Removals in Barking from £100. House moves, flat moves and man & van service across Barking, Dagenham, Becontree and IG11. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Barking',
-      title: 'Man & Van Barking — Fast Removals in IG11',
+      title: 'Removals Barking — Fast Man & Van in IG11',
       subtitle: 'Trusted removal service across Barking, Dagenham and Becontree. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Barking and Dagenham is one of East London's most affordable boroughs, with a large stock of post-war housing, terraced homes, and new riverside developments near the Thames. Our team covers all IG11 and RM postcodes and knows the area well — including the best routes through Barking town centre and access to the new Barking Riverside development.",
@@ -250,11 +253,11 @@ export const locations = [
   {
     slug: 'barnet',
     name: 'Barnet',
-    title: 'Man & Van Barnet — Removals in Barnet, EN5',
-    description: 'Professional man and van service in Barnet, EN5. House moves, flat moves, office relocations across Barnet, Finchley, Hendon, Edgware and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Barnet — Man & Van EN5 from £100 | London Express Removals',
+    description: 'Removals in Barnet from £100. House moves, flat moves and man & van service across Barnet, Finchley, Hendon and EN5. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Barnet',
-      title: 'Man & Van Barnet — Trusted Removals in EN5',
+      title: 'Removals Barnet — Trusted Man & Van in EN5',
       subtitle: 'Reliable removal service across Barnet, Finchley, Hendon and Edgware. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Barnet is one of North London's largest and most prosperous boroughs, stretching from the leafy streets of East Barnet to the busy high streets of Finchley and Hendon. Our team covers all EN4, EN5, N2, N3, N12, and NW4 postcodes, handling everything from large family homes to retirement flat moves.",
@@ -270,11 +273,11 @@ export const locations = [
   {
     slug: 'bexley',
     name: 'Bexley',
-    title: 'Man & Van Bexley — Removals in Bexley, DA5',
-    description: 'Professional man and van service in Bexley, DA5. House moves, flat moves, office relocations across Bexley, Bexleyheath, Sidcup and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Bexley — Man & Van DA5 from £100 | London Express Removals',
+    description: 'Removals in Bexley from £100. House moves, flat moves and man & van service across Bexley, Bexleyheath, Sidcup and DA5. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Bexley',
-      title: 'Man & Van Bexley — Reliable Removals in DA5',
+      title: 'Removals Bexley — Reliable Man & Van in DA5',
       subtitle: 'Trusted removal service across Bexley, Bexleyheath, Sidcup and Erith. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Bexley is a largely suburban borough in South East London, bordering Kent with a mix of interwar semis, Victorian terraces, and new riverside developments near Erith. Our team covers all DA postcodes and regularly moves families relocating between Bexley and other parts of London or beyond.",
@@ -290,11 +293,11 @@ export const locations = [
   {
     slug: 'wembley',
     name: 'Wembley',
-    title: 'Man & Van Wembley — Removals in Wembley, HA9',
-    description: 'Professional man and van service in Wembley, HA9. House moves, flat moves, office relocations across Wembley, Harlesden, Willesden and surrounding Brent areas. Instant pricing, same-day available.',
+    title: 'Removals Wembley — Man & Van HA9 from £100 | London Express Removals',
+    description: 'Removals in Wembley from £100. House moves, flat moves and man & van service across Wembley, Harlesden, Willesden and HA9. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Wembley',
-      title: 'Man & Van Wembley — Fast Removals in HA9',
+      title: 'Removals Wembley — Fast Man & Van in HA9',
       subtitle: 'Trusted removal service across Wembley, Harlesden, Willesden and Neasden. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Wembley and the London Borough of Brent is one of North West London's most diverse areas, home to a huge variety of housing types from new-build flats near Wembley Stadium to Victorian terraces in Willesden and Harlesden. Our team covers all HA and NW10 postcodes and knows the area thoroughly.",
@@ -310,11 +313,11 @@ export const locations = [
   {
     slug: 'bromley',
     name: 'Bromley',
-    title: 'Man & Van Bromley — Removals in Bromley, BR1',
-    description: 'Professional man and van service in Bromley, BR1. House moves, flat moves, office relocations across Bromley, Beckenham, Penge and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Bromley — Man & Van BR1 from £100 | London Express Removals',
+    description: 'Removals in Bromley from £100. House moves, flat moves and man & van service across Bromley, Beckenham, Orpington and BR1. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Bromley',
-      title: 'Man & Van Bromley — Trusted Removals in BR1',
+      title: 'Removals Bromley — Trusted Man & Van in BR1',
       subtitle: 'Reliable removal service across Bromley, Beckenham, Orpington and Penge. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Bromley is London's largest borough by area, covering a wide stretch of South East London from Penge and Beckenham to the leafy suburban streets of Orpington and Chislehurst. Our team covers all BR postcodes, regularly moving families across Bromley and into or out of central London.",
@@ -330,11 +333,11 @@ export const locations = [
   {
     slug: 'ealing',
     name: 'Ealing',
-    title: 'Man & Van Ealing — Removals in Ealing, W5',
-    description: 'Professional man and van service in Ealing, W5. House moves, flat moves, office relocations across Ealing, Acton, Hanwell and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Ealing — Man & Van W5 from £100 | London Express Removals',
+    description: 'Removals in Ealing from £100. House moves, flat moves and man & van service across Ealing, Acton, Hanwell and W5. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Ealing',
-      title: 'Man & Van Ealing — Reliable Removals in W5',
+      title: 'Removals Ealing — Reliable Man & Van in W5',
       subtitle: 'Trusted removal service across Ealing, Acton, Hanwell and Southall. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Ealing is known as the 'Queen of the Suburbs', with beautiful Edwardian and Victorian housing, tree-lined streets, and excellent transport links. Our team covers all W5, W13, UB1, and UB2 postcodes, regularly moving residents and professionals across this popular West London borough.",
@@ -350,11 +353,11 @@ export const locations = [
   {
     slug: 'enfield',
     name: 'Enfield',
-    title: 'Man & Van Enfield — Removals in Enfield, EN1',
-    description: 'Professional man and van service in Enfield, EN1. House moves, flat moves, office relocations across Enfield, Edmonton, Palmers Green and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Enfield — Man & Van EN1 from £100 | London Express Removals',
+    description: 'Removals in Enfield from £100. House moves, flat moves and man & van service across Enfield, Edmonton, Palmers Green and EN1. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Enfield',
-      title: 'Man & Van Enfield — Fast Removals in EN1',
+      title: 'Removals Enfield — Fast Man & Van in EN1',
       subtitle: 'Trusted removal service across Enfield, Edmonton, Palmers Green and Winchmore Hill. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Enfield is one of North London's most northern boroughs, offering a mix of suburban family homes, greenbelt edges, and busy commercial areas around Edmonton. Our team covers all EN1-EN3 and N9, N13, N14, N21 postcodes, and regularly moves families across Enfield and into central London.",
@@ -370,11 +373,11 @@ export const locations = [
   {
     slug: 'hammersmith',
     name: 'Hammersmith',
-    title: 'Man & Van Hammersmith — Removals in Hammersmith & Fulham, W6',
-    description: 'Professional man and van service in Hammersmith, W6. House moves, flat moves, office relocations across Hammersmith, Fulham, Shepherd\'s Bush and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Hammersmith — Man & Van W6 from £100 | London Express Removals',
+    description: "Removals in Hammersmith from £100. House moves, flat moves and man & van service across Hammersmith, Fulham, Shepherd's Bush and W6. Same-day available, no hidden fees. Instant quote online.",
     hero: {
       eyebrow: 'Removals in Hammersmith',
-      title: 'Man & Van Hammersmith — Trusted Removals in W6',
+      title: 'Removals Hammersmith — Trusted Man & Van in W6',
       subtitle: "Reliable removal service across Hammersmith, Fulham, Shepherd's Bush and Brook Green. Instant pricing, no hidden fees, same-day moves available.",
     },
     about: "Hammersmith and Fulham is one of West London's most desirable boroughs, with riverside apartments along the Thames in Fulham, Victorian terraces in Brook Green, and busy commercial areas around Hammersmith Broadway. Our team covers all W6, W14, SW6, and SW10 postcodes.",
@@ -390,11 +393,11 @@ export const locations = [
   {
     slug: 'tottenham',
     name: 'Tottenham',
-    title: 'Man & Van Tottenham — Removals in Tottenham & Haringey, N17',
-    description: 'Professional man and van service in Tottenham, N17. House moves, flat moves, office relocations across Tottenham, Wood Green, Hornsey and surrounding Haringey areas. Instant pricing, same-day available.',
+    title: 'Removals Tottenham — Man & Van N17 from £100 | London Express Removals',
+    description: 'Removals in Tottenham from £100. House moves, flat moves and man & van service across Tottenham, Wood Green, Hornsey and N17. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Tottenham',
-      title: 'Man & Van Tottenham — Reliable Removals in N17',
+      title: 'Removals Tottenham — Reliable Man & Van in N17',
       subtitle: 'Trusted removal service across Tottenham, Wood Green, Hornsey and Muswell Hill. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Haringey is a diverse North London borough stretching from the lively streets of Tottenham and Wood Green to the leafier residential areas of Hornsey and Muswell Hill. Our team covers all N4, N8, N10, N15, N17, and N22 postcodes, regularly moving families and young professionals across the borough.",
@@ -410,11 +413,11 @@ export const locations = [
   {
     slug: 'harrow',
     name: 'Harrow',
-    title: 'Man & Van Harrow — Removals in Harrow, HA1',
-    description: 'Professional man and van service in Harrow, HA1. House moves, flat moves, office relocations across Harrow, Harrow on the Hill, Pinner and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Harrow — Man & Van HA1 from £100 | London Express Removals',
+    description: 'Removals in Harrow from £100. House moves, flat moves and man & van service across Harrow, Pinner, Wealdstone and HA1. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Harrow',
-      title: 'Man & Van Harrow — Fast Removals in HA1',
+      title: 'Removals Harrow — Fast Man & Van in HA1',
       subtitle: 'Trusted removal service across Harrow, Pinner, Wealdstone and Kenton. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Harrow is a large North West London borough with a mix of suburban family homes, Edwardian terraces around Harrow on the Hill, and modern apartments near the station. Our team covers all HA1-HA3 postcodes and regularly moves families across Harrow and into or out of central London.",
@@ -430,11 +433,11 @@ export const locations = [
   {
     slug: 'hounslow',
     name: 'Hounslow',
-    title: 'Man & Van Hounslow — Removals in Hounslow, TW3',
-    description: 'Professional man and van service in Hounslow, TW3. House moves, flat moves, office relocations across Hounslow, Chiswick, Brentford and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Hounslow — Man & Van TW3 from £100 | London Express Removals',
+    description: 'Removals in Hounslow from £100. House moves, flat moves and man & van service across Hounslow, Chiswick, Brentford and TW3. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Hounslow',
-      title: 'Man & Van Hounslow — Trusted Removals in TW3',
+      title: 'Removals Hounslow — Trusted Man & Van in TW3',
       subtitle: 'Reliable removal service across Hounslow, Chiswick, Brentford and Feltham. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Hounslow is a West London borough stretching from the riverside at Chiswick and Brentford to the suburbs of Feltham and Heston near Heathrow. Our team covers all TW3-TW6 and W4 postcodes, regularly moving residents and businesses across the borough.",
@@ -450,15 +453,15 @@ export const locations = [
   {
     slug: 'kensington',
     name: 'Kensington',
-    title: 'Man & Van Kensington — Removals in Kensington & Chelsea, W8',
-    description: 'Professional man and van service in Kensington, W8. House moves, flat moves, office relocations across Kensington, Chelsea, Notting Hill and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Kensington — Man & Van W8 from £130 | London Express Removals',
+    description: 'Removals in Kensington from £130. House moves, flat moves and man & van service across Kensington, Chelsea, Notting Hill and W8. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Kensington',
-      title: 'Man & Van Kensington — Premium Removals in W8',
+      title: 'Removals Kensington — Premium Man & Van in W8',
       subtitle: 'Trusted removal service across Kensington, Chelsea, Notting Hill and Holland Park. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Kensington and Chelsea is one of London's most prestigious boroughs, home to grand stucco townhouses, garden squares, and luxury apartments. Our team is experienced in handling high-value moves with care, navigating the parking restrictions of Chelsea and Kensington, and working in buildings with strict access requirements.",
-    areas: ['Kensington', 'Chelsea', 'Notting Hill', 'Holland Park', 'Earl\'s Court', 'South Kensington', 'North Kensington', 'World\'s End'],
+    areas: ['Kensington', 'Chelsea', 'Notting Hill', 'Holland Park', "Earl's Court", 'South Kensington', 'North Kensington', "World's End"],
     faqs: [
       { q: "Do you cover Chelsea, Notting Hill and Earl's Court?", a: "Yes — we cover all of Kensington and Chelsea including Chelsea, Notting Hill, Holland Park, Earl's Court, South Kensington and all W8, W11, W14, SW3, SW5, SW10 postcodes." },
       { q: 'Can you handle high-value moves in Kensington?', a: 'Yes — our team is experienced with high-value and luxury moves, taking extra care with antiques, artwork, and fragile items. We can arrange specialist wrapping and packing on request.' },
@@ -470,11 +473,11 @@ export const locations = [
   {
     slug: 'kingston',
     name: 'Kingston',
-    title: 'Man & Van Kingston — Removals in Kingston upon Thames, KT1',
-    description: 'Professional man and van service in Kingston, KT1. House moves, flat moves, office relocations across Kingston, Surbiton, New Malden and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Kingston — Man & Van KT1 from £100 | London Express Removals',
+    description: 'Removals in Kingston from £100. House moves, flat moves and man & van service across Kingston, Surbiton, New Malden and KT1. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Kingston',
-      title: 'Man & Van Kingston — Reliable Removals in KT1',
+      title: 'Removals Kingston — Reliable Man & Van in KT1',
       subtitle: 'Trusted removal service across Kingston, Surbiton, New Malden and Chessington. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Kingston upon Thames is a historic market town and one of South West London's most popular areas, with a mix of riverside apartments, Victorian terraces, and family homes in Surbiton and New Malden. Our team covers all KT1-KT3 postcodes and regularly moves residents across Kingston and surrounding areas.",
@@ -490,11 +493,11 @@ export const locations = [
   {
     slug: 'lewisham',
     name: 'Lewisham',
-    title: 'Man & Van Lewisham — Removals in Lewisham, SE13',
-    description: 'Professional man and van service in Lewisham, SE13. House moves, flat moves, office relocations across Lewisham, Catford, Forest Hill and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Lewisham — Man & Van SE13 from £100 | London Express Removals',
+    description: 'Removals in Lewisham from £100. House moves, flat moves and man & van service across Lewisham, Catford, Forest Hill and SE13. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Lewisham',
-      title: 'Man & Van Lewisham — Fast Removals in SE13',
+      title: 'Removals Lewisham — Fast Man & Van in SE13',
       subtitle: 'Trusted removal service across Lewisham, Catford, Forest Hill and Sydenham. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Lewisham is a diverse and rapidly changing South East London borough, with great transport links into the City and Canary Wharf. It offers a mix of Victorian terraces, mansion flats, and new-build developments across areas like Catford, Forest Hill, and Brockley. Our team covers all SE4, SE6, SE13, SE23, and SE26 postcodes.",
@@ -510,11 +513,11 @@ export const locations = [
   {
     slug: 'wimbledon',
     name: 'Wimbledon',
-    title: 'Man & Van Wimbledon — Removals in Wimbledon & Merton, SW19',
-    description: 'Professional man and van service in Wimbledon, SW19. House moves, flat moves, office relocations across Wimbledon, Mitcham, Morden and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Wimbledon — Man & Van SW19 from £100 | London Express Removals',
+    description: 'Removals in Wimbledon from £100. House moves, flat moves and man & van service across Wimbledon, Colliers Wood, Mitcham and SW19. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Wimbledon',
-      title: 'Man & Van Wimbledon — Trusted Removals in SW19',
+      title: 'Removals Wimbledon — Trusted Man & Van in SW19',
       subtitle: 'Reliable removal service across Wimbledon, Colliers Wood, Mitcham and Morden. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Wimbledon and the London Borough of Merton offers a mix of prestigious family homes near Wimbledon Common, high-street living in Mitcham, and transport-connected flats near Colliers Wood and Morden. Our team covers all SW19, SW20, CR4, and SM4 postcodes.",
@@ -530,11 +533,11 @@ export const locations = [
   {
     slug: 'ilford',
     name: 'Ilford',
-    title: 'Man & Van Ilford — Removals in Ilford & Redbridge, IG1',
-    description: 'Professional man and van service in Ilford, IG1. House moves, flat moves, office relocations across Ilford, Woodford, South Woodford and surrounding Redbridge areas. Instant pricing, same-day available.',
+    title: 'Removals Ilford — Man & Van IG1 from £100 | London Express Removals',
+    description: 'Removals in Ilford from £100. House moves, flat moves and man & van service across Ilford, Woodford, South Woodford and IG1. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Ilford',
-      title: 'Man & Van Ilford — Fast Removals in IG1',
+      title: 'Removals Ilford — Fast Man & Van in IG1',
       subtitle: 'Trusted removal service across Ilford, Woodford, Wanstead and Barkingside. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Ilford is the main town in the London Borough of Redbridge, a diverse and busy East London area with excellent Elizabeth line connections into central London. It offers a mix of Victorian terraces, 1930s semis, and new-build apartments. Our team covers all IG1-IG6 postcodes.",
@@ -550,11 +553,11 @@ export const locations = [
   {
     slug: 'richmond',
     name: 'Richmond',
-    title: 'Man & Van Richmond — Removals in Richmond upon Thames, TW9',
-    description: 'Professional man and van service in Richmond, TW9. House moves, flat moves, office relocations across Richmond, Twickenham, Teddington and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Richmond — Man & Van TW9 from £100 | London Express Removals',
+    description: 'Removals in Richmond from £100. House moves, flat moves and man & van service across Richmond, Twickenham, Teddington and TW9. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Richmond',
-      title: 'Man & Van Richmond — Trusted Removals in TW9',
+      title: 'Removals Richmond — Trusted Man & Van in TW9',
       subtitle: 'Reliable removal service across Richmond, Twickenham, Teddington and East Sheen. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Richmond upon Thames is one of London's most beautiful and desirable boroughs, with riverside villages, extensive parkland, and a mix of Georgian townhouses, Victorian semis, and modern apartments. Our team covers all TW9, TW10, TW11, TW12, and SW13 postcodes.",
@@ -570,11 +573,11 @@ export const locations = [
   {
     slug: 'peckham',
     name: 'Peckham',
-    title: 'Man & Van Peckham — Removals in Peckham & Southwark, SE15',
-    description: 'Professional man and van service in Peckham, SE15. House moves, flat moves, office relocations across Peckham, Bermondsey, Borough and surrounding Southwark areas. Instant pricing, same-day available.',
+    title: 'Removals Peckham — Man & Van SE15 from £100 | London Express Removals',
+    description: 'Removals in Peckham from £100. House moves, flat moves and man & van service across Peckham, Bermondsey, Borough and SE15. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Peckham',
-      title: 'Man & Van Peckham — Reliable Removals in SE15',
+      title: 'Removals Peckham — Reliable Man & Van in SE15',
       subtitle: 'Trusted removal service across Peckham, Bermondsey, Borough and Dulwich. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Southwark is one of central London's largest and most diverse boroughs, stretching from Borough Market and London Bridge to the creative hubs of Peckham and the leafy streets of Dulwich. Our team covers all SE1, SE5, SE15, SE16, SE17, and SE22 postcodes.",
@@ -590,11 +593,11 @@ export const locations = [
   {
     slug: 'sutton',
     name: 'Sutton',
-    title: 'Man & Van Sutton — Removals in Sutton, SM1',
-    description: 'Professional man and van service in Sutton, SM1. House moves, flat moves, office relocations across Sutton, Cheam, Carshalton and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Sutton — Man & Van SM1 from £100 | London Express Removals',
+    description: 'Removals in Sutton from £100. House moves, flat moves and man & van service across Sutton, Cheam, Carshalton and SM1. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Sutton',
-      title: 'Man & Van Sutton — Fast Removals in SM1',
+      title: 'Removals Sutton — Fast Man & Van in SM1',
       subtitle: 'Trusted removal service across Sutton, Cheam, Carshalton and Wallington. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Sutton is a suburban South London borough with a mix of family homes, Victorian terraces, and modern flats close to excellent transport links. Our team covers all SM1-SM3 postcodes and regularly moves families across Sutton and neighbouring boroughs.",
@@ -610,11 +613,11 @@ export const locations = [
   {
     slug: 'canary-wharf',
     name: 'Canary Wharf',
-    title: 'Man & Van Canary Wharf — Removals in Canary Wharf, E14',
-    description: 'Professional man and van service in Canary Wharf, E14. House moves, flat moves, office relocations across Canary Wharf, Isle of Dogs, Poplar and surrounding Tower Hamlets areas. Instant pricing, same-day available.',
+    title: 'Removals Canary Wharf — Man & Van E14 from £100 | London Express Removals',
+    description: 'Removals in Canary Wharf from £100. House moves, flat moves and man & van service across Canary Wharf, Isle of Dogs, Poplar and E14. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Canary Wharf',
-      title: 'Man & Van Canary Wharf — Trusted Removals in E14',
+      title: 'Removals Canary Wharf — Trusted Man & Van in E14',
       subtitle: 'Reliable removal service across Canary Wharf, Isle of Dogs, Poplar and Limehouse. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Canary Wharf and the Isle of Dogs is one of London's most concentrated areas of high-rise residential living, with hundreds of apartment buildings ranging from older 1990s blocks to brand new luxury towers. Our team is highly experienced with service lift bookings, loading bay access, building management coordination, and the strict access requirements common in E14.",
@@ -630,11 +633,11 @@ export const locations = [
   {
     slug: 'walthamstow',
     name: 'Walthamstow',
-    title: 'Man & Van Walthamstow — Removals in Walthamstow, E17',
-    description: 'Professional man and van service in Walthamstow, E17. House moves, flat moves, office relocations across Walthamstow, Leyton, Chingford and surrounding Waltham Forest areas. Instant pricing, same-day available.',
+    title: 'Removals Walthamstow — Man & Van E17 from £100 | London Express Removals',
+    description: 'Removals in Walthamstow from £100. House moves, flat moves and man & van service across Walthamstow, Leyton, Chingford and E17. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Walthamstow',
-      title: 'Man & Van Walthamstow — Reliable Removals in E17',
+      title: 'Removals Walthamstow — Reliable Man & Van in E17',
       subtitle: 'Trusted removal service across Walthamstow, Chingford, Leyton and Leytonstone. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Walthamstow and the London Borough of Waltham Forest has become one of East London's most popular areas, with a thriving creative scene, the famous Walthamstow Market, and excellent Victoria line connections. Our team covers all E4, E10, E11, and E17 postcodes.",
@@ -650,11 +653,11 @@ export const locations = [
   {
     slug: 'westminster',
     name: 'Westminster',
-    title: 'Man & Van Westminster — Removals in Westminster, W1',
-    description: 'Professional man and van service in Westminster, W1. House moves, flat moves, office relocations across Westminster, Mayfair, Marylebone and surrounding areas. Instant pricing, same-day available.',
+    title: 'Removals Westminster — Man & Van W1 from £130 | London Express Removals',
+    description: 'Removals in Westminster from £130. House moves, flat moves and man & van service across Westminster, Mayfair, Marylebone and W1. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Westminster',
-      title: 'Man & Van Westminster — Premium Removals in W1',
+      title: 'Removals Westminster — Premium Man & Van in W1',
       subtitle: 'Trusted removal service across Westminster, Mayfair, Marylebone and Pimlico. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "The City of Westminster sits at the heart of central London, covering some of the capital's most prestigious addresses — from Mayfair and Marylebone to Pimlico and St John's Wood. Moves in Westminster require careful planning around the Congestion Charge, parking restrictions, and building access requirements. Our team handles all of this as standard.",
@@ -670,11 +673,11 @@ export const locations = [
   {
     slug: 'uxbridge',
     name: 'Uxbridge',
-    title: 'Man & Van Uxbridge — Removals in Uxbridge & Hillingdon, UB8',
-    description: 'Professional man and van service in Uxbridge, UB8. House moves, flat moves, office relocations across Uxbridge, Hayes, Ruislip and surrounding Hillingdon areas. Instant pricing, same-day available.',
+    title: 'Removals Uxbridge — Man & Van UB8 from £100 | London Express Removals',
+    description: 'Removals in Uxbridge from £100. House moves, flat moves and man & van service across Uxbridge, Hayes, Ruislip and UB8. Same-day available, no hidden fees. Instant quote online.',
     hero: {
       eyebrow: 'Removals in Uxbridge',
-      title: 'Man & Van Uxbridge — Reliable Removals in UB8',
+      title: 'Removals Uxbridge — Reliable Man & Van in UB8',
       subtitle: 'Trusted removal service across Uxbridge, Hayes, Ruislip and Northwood. Instant pricing, no hidden fees, same-day moves available.',
     },
     about: "Hillingdon is one of West London's largest boroughs, stretching from Uxbridge on the western edge of London to Hayes and Ruislip closer to the centre. It has excellent M40 and M4 motorway access, making it a popular base for long-distance moves. Our team covers all UB postcodes.",
