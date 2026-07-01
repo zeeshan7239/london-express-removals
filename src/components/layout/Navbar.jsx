@@ -25,7 +25,7 @@ import { siteConfig } from '@/lib/utils/siteConfig';
 //
 // While LOGO_SRC is null the truck icon + wordmark fallback is shown.
 // ─────────────────────────────────────────────────────────────────────────────
-const LOGO_SRC = "https://asset.cloudinary.com/dfq9zvwsq/bc1bd0077884611d04b2b3ed8a44ab66"   // ← swap to '/logo.png' or your CDN URL
+const LOGO_SRC = '/logo.png'  // ← swap to '/logo.png' or your CDN URL
 const LOGO_ALT = 'London Express Removals';
 const LOGO_W   = 160;    // natural render width in px — adjust to your logo
 const LOGO_H   = 44;     // natural render height in px — adjust to your logo
