@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,6 +15,7 @@ import PostcodeAutocomplete from '@/components/quote/PostcodeAutocomplete';
 import AddressPicker from '@/components/quote/AddressPicker';
 import { isValidEmail, isValidUKPhone } from '@/lib/utils/validation';
 import { siteConfig } from '@/lib/utils/siteConfig';
+import { getAvailableTimeSlots, formatTime12h } from '@/lib/utils/timeSlots';
 import api from '@/lib/utils/api';
 
 const propertyTypeOptions = ['House', 'Flat', 'Office', 'Storage', 'Other'];
@@ -25,24 +26,6 @@ const bedroomOptions = ['Studio','1 Bedroom','2 Bedrooms','3 Bedrooms','4 Bedroo
 const BOX_PRICE  = 5;
 const WRAP_PRICE = 15;
 const TAPE_PRICE = 10;
-
-// Preferred move time slots — 07:00 to 21:00 in 30-minute increments
-const TIME_SLOTS = (() => {
-  const slots = [];
-  for (let h = 7; h <= 21; h++) {
-    slots.push(`${String(h).padStart(2, '0')}:00`);
-    if (h < 21) slots.push(`${String(h).padStart(2, '0')}:30`);
-  }
-  return slots;
-})();
-
-const formatTime12h = (t24) => {
-  if (!t24) return '';
-  const [h, m] = t24.split(':').map(Number);
-  const period = h >= 12 ? 'PM' : 'AM';
-  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-  return `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}`;
-};
 
 const initSide = () => ({ propertyType: '', floor: '', lift: '', postcode: '', address: '', lat: null, lon: null });
 const emptyStop = () => ({ postcode: '', address: '', floor: '', lat: null, lon: null });
@@ -114,6 +97,27 @@ function CustomQuotePage() {
   // Notes
   const [notes, setNotes] = useState('');
 
+  // ── Dynamic time slots (spec #5) ────────────────────────────────────────────
+  // Same-day: hide passed slots. Tick every 60s so slots roll forward.
+  const [nowTick, setNowTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setNowTick((n) => n + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const { slots: availableTimeSlots, sameDayClosed } = useMemo(
+    () => getAvailableTimeSlots(movingDate, new Date()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [movingDate, nowTick]
+  );
+
+  // Clear stale time selection when it's no longer valid
+  useEffect(() => {
+    if (preferredTime && !availableTimeSlots.includes(preferredTime)) {
+      setPreferredTime('');
+    }
+  }, [availableTimeSlots, preferredTime]);
+
   // Stop helpers
   const addStop    = () => setStops(s => [...s, emptyStop()]);
   const removeStop = (i) => setStops(s => s.filter((_, idx) => idx !== i));
@@ -129,6 +133,7 @@ function CustomQuotePage() {
     if (!pickup.postcode?.trim())        return { message: 'Please enter a pickup postcode.',      id: 'cq-pickup' };
     if (!delivery.postcode?.trim())      return { message: 'Please enter a delivery postcode.',    id: 'cq-delivery' };
     if (!movingDate)                     return { message: 'Please choose your preferred date.',   id: 'cq-date' };
+    if (sameDayClosed)                   return { message: 'Online booking for today is no longer available. Please select another date or contact us directly.', id: 'cq-date' };
     return null;
   };
 
@@ -418,15 +423,32 @@ function CustomQuotePage() {
                   </div>
                   <div>
                     <Label htmlFor="cq-time" icon={Clock}>Preferred start time <span className="text-ink-400 font-normal">(optional)</span></Label>
-                    <select id="cq-time" className="input-field"
-                      value={preferredTime} onChange={e => setPreferredTime(e.target.value)}>
-                      <option value="">Any time (07:00 – 21:00)</option>
-                      {TIME_SLOTS.map(t => (
+                    <select
+                      id="cq-time"
+                      className="input-field disabled:opacity-50 disabled:cursor-not-allowed"
+                      value={preferredTime}
+                      onChange={e => setPreferredTime(e.target.value)}
+                      disabled={sameDayClosed}>
+                      <option value="">
+                        {sameDayClosed ? 'No slots available today' : 'Any available time'}
+                      </option>
+                      {availableTimeSlots.map(t => (
                         <option key={t} value={t}>{formatTime12h(t)}</option>
                       ))}
                     </select>
                   </div>
                 </div>
+
+                {/* Same-day cutoff notice */}
+                {sameDayClosed && (
+                  <div className="mt-3 rounded-xl border-2 border-amber-400 bg-amber-50 p-3 flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="text-xs text-ink-700">
+                      <strong className="text-ink-900">Online booking for today is no longer available.</strong>{' '}
+                      Please select another date or contact us directly.
+                    </div>
+                  </div>
+                )}
                 <div className="mt-4">
                   <Label icon={Home}>Number of bedrooms</Label>
                   <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">

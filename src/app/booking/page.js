@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -20,31 +20,13 @@ import { useAuth } from '@/components/common/AuthContext';
 import { isValidEmail, isValidUKPhone } from '@/lib/utils/validation';
 import { siteConfig } from '@/lib/utils/siteConfig';
 import { isInsideM25 } from '@/lib/services/pricingService';
+import { getAvailableTimeSlots, formatTime12h } from '@/lib/utils/timeSlots';
 import api from '@/lib/utils/api';
 
 // Packing prices (internal only — never shown in form)
 const BOX_PRICE  = 5;
 const WRAP_PRICE = 15;
 const TAPE_PRICE = 10;  // per roll
-
-// Preferred move time slots — 07:00 to 21:00 in 30-minute increments
-const TIME_SLOTS = (() => {
-  const slots = [];
-  for (let h = 7; h <= 21; h++) {
-    slots.push(`${String(h).padStart(2, '0')}:00`);
-    if (h < 21) slots.push(`${String(h).padStart(2, '0')}:30`);
-  }
-  return slots;
-})();
-
-// Convert "14:30" → "02:30 PM" for display
-const formatTime12h = (t24) => {
-  if (!t24) return '';
-  const [h, m] = t24.split(':').map(Number);
-  const period = h >= 12 ? 'PM' : 'AM';
-  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-  return `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}`;
-};
 
 const movingTypes = [
   { v: 'Studio',      icon: Home,      desc: 'Studio flat' },
@@ -139,6 +121,32 @@ export default function BookingPage() {
       },
     }));
   }, [user]);
+
+  // ── Dynamic time slots (spec #5) ────────────────────────────────────────────
+  // Same-day bookings hide slots that have already passed (with a buffer).
+  // We tick a `nowTick` value every 60 s so if the customer sits on the form
+  // for a while, the earliest slot rolls forward automatically.
+  const [nowTick, setNowTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setNowTick((n) => n + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const { slots: availableTimeSlots, sameDayClosed } = useMemo(
+    () => getAvailableTimeSlots(data.movingDate, new Date()),
+    // nowTick is intentionally included so slots refresh over time
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data.movingDate, nowTick]
+  );
+
+  // If the customer's chosen time is no longer valid (e.g. they picked a slot,
+  // then time passed, or they switched to a same-day booking), clear it.
+  useEffect(() => {
+    if (!data.preferredTime) return;
+    if (!availableTimeSlots.includes(data.preferredTime)) {
+      setData((prev) => ({ ...prev, preferredTime: '' }));
+    }
+  }, [availableTimeSlots, data.preferredTime]);
 
   const set = (path, value) => {
     setData((prev) => {
@@ -265,6 +273,7 @@ export default function BookingPage() {
         if (!isGroundFloor(data.delivery.floor) && !data.delivery.access)
           return { message: 'Please select delivery lift or stairs.', fieldId: 'delivery-access' };
         if (!data.movingDate)        return { message: 'Please choose your moving date.',      fieldId: 'moving-date' };
+        if (sameDayClosed)           return { message: 'Online booking for today is no longer available. Please select another date or contact us directly.', fieldId: 'moving-date' };
         return null;
       }
       case 3: {
@@ -554,11 +563,16 @@ export default function BookingPage() {
                               <span className="text-ink-400 font-normal">(optional)</span>
                             </label>
                             <div className="relative">
-                              <select id="preferred-time" value={data.preferredTime}
+                              <select
+                                id="preferred-time"
+                                value={data.preferredTime}
                                 onChange={e => set('preferredTime', e.target.value)}
-                                className={`input-field appearance-none pr-10 cursor-pointer ${data.preferredTime ? 'border-emerald-500' : ''}`}>
-                                <option value="">Any time (07:00 – 21:00)</option>
-                                {TIME_SLOTS.map(t => (
+                                disabled={sameDayClosed}
+                                className={`input-field appearance-none pr-10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${data.preferredTime ? 'border-emerald-500' : ''}`}>
+                                <option value="">
+                                  {sameDayClosed ? 'No slots available today' : 'Any available time'}
+                                </option>
+                                {availableTimeSlots.map(t => (
                                   <option key={t} value={t}>{formatTime12h(t)}</option>
                                 ))}
                               </select>
@@ -566,6 +580,17 @@ export default function BookingPage() {
                             </div>
                           </div>
                         </div>
+
+                        {/* Same-day cutoff message */}
+                        {sameDayClosed && (
+                          <div className="rounded-2xl border-2 border-amber-400 bg-amber-50 p-4 flex items-start gap-3">
+                            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                            <div className="text-sm text-ink-700">
+                              <strong className="text-ink-900">Online booking for today is no longer available.</strong>{' '}
+                              Please select another date or contact us directly.
+                            </div>
+                          </div>
+                        )}
 
                         {/* ── OUTSIDE M25 BANNER — replaces everything, blocks progression ── */}
                         {anyOutside && (
@@ -837,7 +862,7 @@ export default function BookingPage() {
                 </button>
                 {step < STEPS ? (
                   <button onClick={handleContinue}
-                    disabled={step === 2 && anyOutside}
+                    disabled={step === 2 && (anyOutside || sameDayClosed)}
                     className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
                     Continue <ChevronRight className="w-4 h-4" />
                   </button>

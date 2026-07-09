@@ -4,6 +4,7 @@ import Quote from '@/lib/models/Quote.js';
 import { getCurrentUser, requireAdmin, AuthError } from '@/lib/middleware/auth.js';
 import { sendQuoteEmails } from '@/lib/services/emailService.js';
 import { sendWhatsAppNotification } from '@/lib/services/whatsappService.js';
+import { getAvailableTimeSlots } from '@/lib/utils/timeSlots.js';
 
 // POST /api/quotes — create a new booking or quote (public)
 export async function POST(req) {
@@ -13,6 +14,30 @@ export async function POST(req) {
 
     const payload = { ...body };
     if (!payload.kind) payload.kind = 'booking';
+
+    // ── Server-side same-day time validation ──────────────────────────────────
+    // Defence in depth: even if the client is bypassed, reject bookings
+    // whose preferredTime has already passed (or every slot has passed).
+    if (payload.movingDate) {
+      const date = new Date(payload.movingDate);
+      if (!isNaN(date.getTime())) {
+        const dateStr = date.toISOString().slice(0, 10);
+        const { slots, sameDayClosed } = getAvailableTimeSlots(dateStr, new Date());
+
+        if (sameDayClosed) {
+          return NextResponse.json(
+            { success: false, message: 'Online booking for today is no longer available. Please select another date or contact us directly.' },
+            { status: 400 }
+          );
+        }
+        if (payload.preferredTime && !slots.includes(payload.preferredTime)) {
+          return NextResponse.json(
+            { success: false, message: 'That time slot is no longer available. Please choose another time.' },
+            { status: 400 }
+          );
+        }
+      }
+    }
 
     // Link to authenticated user if present (cookie auth)
     const user = await getCurrentUser();
