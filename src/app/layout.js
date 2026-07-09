@@ -1,5 +1,6 @@
 import './globals.css';
 import Providers from '@/components/common/Providers';
+import NavigationProgress from '@/components/common/NavigationProgress';
 import { siteConfig } from '@/lib/utils/siteConfig';
 
 // Note: In production with internet access, restore these next/font imports:
@@ -99,7 +100,10 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body suppressHydrationWarning>
-        <Providers>{children}</Providers>
+        <Providers>
+          <NavigationProgress />
+          {children}
+        </Providers>
       </body>
     </html>
   );

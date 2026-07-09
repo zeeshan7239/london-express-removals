@@ -30,9 +30,9 @@ const pricingConfig = {
   ],
 
   teams: {
-    driverHelp: { label: 'Driver Help', sublabel: '1 Man + Van', basePrice: 130, includedHours: 2, extraHourRate: 60 },
-    twoMen:     { label: '2 Men Team', sublabel: 'Most popular',  basePrice: 160, includedHours: 2, extraHourRate: 70 },
-    threeMen:   { label: '3 Men Team', sublabel: 'For bigger moves', basePrice: 220, includedHours: 2, extraHourRate: 90 },
+    driverHelp: { label: 'Driver Help',   sublabel: '1 Man + Van',      basePrice: 130, includedHours: 2, extraHourRate: 60 },
+    twoMen:     { label: '2 Men Team',    sublabel: 'Most popular',     basePrice: 160, includedHours: 2, extraHourRate: 70 },
+    threeMen:   { label: '3 Men Team',    sublabel: 'For bigger moves', basePrice: 220, includedHours: 2, extraHourRate: 90 },
   },
 
   floorBands: {
@@ -77,7 +77,7 @@ const pricingConfig = {
   },
 
   propertyTypes: {
-    'Studio':       { label: 'Studio Move',       multiplier: 0.90, suggestedHours: 2 },
+    'Studio':       { label: 'Studio Move',      multiplier: 0.90, suggestedHours: 2 },
     'Flat':         { label: 'Flat Move',         multiplier: 1.00, suggestedHours: 2 },
     'House':        { label: 'House Move',        multiplier: 1.00, suggestedHours: 3 },
     'Office':       { label: 'Office Move',       multiplier: 1.10, suggestedHours: 3 },
@@ -87,6 +87,22 @@ const pricingConfig = {
 
   distance: { freeMiles: 5, perMileRate: 2.5 },
   durations: { options: [2, 3, 4, 5, 6, 8], defaultHours: 2 },
+
+  // ── Packing materials ──────────────────────────────────────────────────────
+  // Boxes: £5 each (small/medium/large)
+  // Bubble wrap: £15 per roll
+  // Tape: £10 per roll — quantity selected by customer
+  // Prices are internal — the form no longer shows unit prices; only the
+  // final sidebar summary shows a single "Packing materials" total line.
+  packingMaterials: {
+    boxes: {
+      small:  { label: 'Small Box',        price: 5  },
+      medium: { label: 'Medium Box',       price: 5  },
+      large:  { label: 'Large Box',        price: 5  },
+    },
+    bubbleWrap: { label: 'Bubble Wrap Roll', price: 15 },
+    tape:       { label: 'Packing Tape Roll', price: 10 },
+  },
 };
 
 export default pricingConfig;

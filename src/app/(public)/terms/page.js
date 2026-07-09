@@ -1,12 +1,10 @@
 import PageHeader from '@/components/common/PageHeader';
 
 export const metadata = {
-  title: 'Terms of Service | London Express Removals',
-  description: 'Terms and conditions for London Express Removals. Booking, cancellation, pricing, insurance and liability terms.',
+  title: 'Terms of Service',
+  description: 'Terms of service for London Express Removals. Booking, cancellation, pricing and liability terms.',
   alternates: { canonical: '/terms' },
-  robots: { index: false, follow: false }, // no SEO value — exclude from index
 };
-
 
 export default function TermsPage() {
   return (
@@ -28,17 +26,19 @@ export default function TermsPage() {
             at the rate disclosed at booking.
           </p>
 
-          <h2 className="font-display font-bold text-2xl mt-8 mb-3">3. Insurance</h2>
+          <h2 className="font-display font-bold text-2xl mt-8 mb-3">3. Care of Belongings</h2>
           <p className="text-ink-700 leading-relaxed mb-4">
-            Goods-in-transit insurance up to £10,000 is included as standard. Higher coverage available on request.
-            Items must be packed appropriately for transit. We are not liable for damage to inadequately packed items.
+            Our team takes every care to handle your belongings safely and professionally. We use appropriate
+            equipment and techniques to protect your items during transit. Customers are responsible for ensuring
+            fragile or high-value items are adequately packaged before the move.
           </p>
 
           <h2 className="font-display font-bold text-2xl mt-8 mb-3">4. Liability</h2>
           <p className="text-ink-700 leading-relaxed mb-4">
-            Our maximum liability for any move is limited to the insurance coverage of £10,000 unless otherwise agreed
-            in writing. We are not liable for indirect or consequential losses, delays caused by traffic or weather,
-            or for items left behind at the pickup location.
+            Our liability for any damage or loss during a move is limited to the cost of repair or replacement of the
+            damaged item, as agreed in writing prior to the move. We are not liable for indirect or consequential losses,
+            delays caused by traffic or weather, or for items left behind at the pickup location. We recommend customers
+            consider appropriate protection for high-value or fragile items.
           </p>
 
           <h2 className="font-display font-bold text-2xl mt-8 mb-3">5. Contact</h2>

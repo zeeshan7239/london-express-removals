@@ -45,6 +45,7 @@ const quoteSchema = new mongoose.Schema(
       },
     },
     movingDate: { type: Date, required: true },
+    preferredTime: { type: String, trim: true }, // e.g. "08:00", "14:30" — 07:00–21:00
     moversNeeded: {
       type: String,
       enum: ['1 Man', '2 Men', '3 Men', 'Not Sure'],
@@ -57,6 +58,39 @@ const quoteSchema = new mongoose.Schema(
     estimatedItems: { type: Number, min: 0 },
     notes: { type: String, maxlength: 1000 },
     images: [{ type: String }],
+
+    // Multiple stops between pickup and final delivery
+    stops: [{
+      postcode: { type: String, trim: true, uppercase: true },
+      address:  { type: String, trim: true },
+      floor:    { type: String, enum: FLOOR_VALUES },
+      access:   { type: String, enum: ['Lift', 'Stairs', 'Both', '', null], default: undefined },
+      lat: { type: Number },
+      lon: { type: Number },
+    }],
+
+    // Packing materials — customer-selectable items (all £internally-priced)
+    packingMaterials: {
+      requested:       { type: Boolean, default: false }, // true only if customer ticked the option
+      smallBoxes:      { type: Number, min: 0, default: 0 },
+      mediumBoxes:     { type: Number, min: 0, default: 0 },
+      largeBoxes:      { type: Number, min: 0, default: 0 },
+      bubbleWrapRolls: { type: Number, min: 0, default: 0 },
+      tapeRolls:       { type: Number, min: 0, default: 0 },
+      total:           { type: Number, default: 0 },
+    },
+
+    // Property + service details
+    propertyDetails: {
+      bedrooms:         { type: String, trim: true },     // e.g. "Studio", "3 Bedrooms"
+      numBeds:          { type: Number, min: 0, default: 0 },
+      numSofas:         { type: Number, min: 0, default: 0 },
+      numLargeItems:    { type: Number, min: 0, default: 0 },
+      dismantling:      { type: Boolean, default: false },
+      reassembly:       { type: Boolean, default: false },
+      parkingAvailable: { type: String, enum: ['yes', 'no', '', null], default: undefined },
+    },
+
     customer: {
       name: { type: String, required: true, trim: true },
       email: { type: String, required: true, trim: true, lowercase: true },

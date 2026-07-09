@@ -6,12 +6,22 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Phone, Mail, MapPin, Calendar, Users, Clock, Package,
-  Check, X, Loader2, MessageSquare, AlertCircle, FileText,
+  Check, X, Loader2, MessageSquare, AlertCircle, FileText, Home,
+  Bed, Sofa, Wrench, Car, Route,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/utils/api';
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+const formatTime12h = (t24) => {
+  if (!t24) return '';
+  const [h, m] = String(t24).split(':').map(Number);
+  if (isNaN(h)) return t24;
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${String(h12).padStart(2, '0')}:${String(m || 0).padStart(2, '0')} ${period}`;
+};
 
 const StatusBadge = ({ status }) => {
   const styles = {
@@ -131,6 +141,9 @@ export default function QuoteDetailPage() {
             <div className="grid sm:grid-cols-2 gap-4">
               <Detail icon={Package} label="Type" value={quote.movingType} />
               <Detail icon={Calendar} label="Date" value={formatDate(quote.movingDate)} />
+              {quote.preferredTime && (
+                <Detail icon={Clock} label="Preferred time" value={formatTime12h(quote.preferredTime)} />
+              )}
               <Detail icon={Users} label="Movers" value={quote.moversNeeded} />
               {quote.durationHours && <Detail icon={Clock} label="Duration" value={`${quote.durationHours} hours`} />}
               <Detail icon={MapPin} label="Pickup" value={
@@ -151,6 +164,97 @@ export default function QuoteDetailPage() {
               {quote.isShortTrip && <Detail icon={Clock} label="Pricing" value={<span className="text-emerald-600 font-semibold">Short-trip rate</span>} />}
             </div>
           </div>
+
+          {/* Intermediate stops (if any) */}
+          {quote.stops && quote.stops.length > 0 && (
+            <div className="bg-white rounded-3xl border border-ink-100 p-5 lg:p-7">
+              <h3 className="font-display font-bold text-sm mb-3 uppercase tracking-wider text-ink-500 flex items-center gap-2">
+                <Route className="w-3.5 h-3.5" /> Additional stops
+              </h3>
+              <div className="space-y-2">
+                {quote.stops.map((s, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-ink-50">
+                    <div className="w-6 h-6 rounded-full bg-ember-500 text-white text-xs font-bold flex items-center justify-center shrink-0">{i + 1}</div>
+                    <div className="text-sm">
+                      {s.address && <div className="text-xs text-ink-500">{s.address}</div>}
+                      <div className="font-semibold text-ink-900">{s.postcode}</div>
+                      {s.floor && <div className="text-xs text-ink-500 mt-0.5">{s.floor}{s.access ? ` · ${s.access}` : ''}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Property & furniture */}
+          {quote.propertyDetails && (
+            quote.propertyDetails.bedrooms
+            || quote.propertyDetails.numBeds > 0
+            || quote.propertyDetails.numSofas > 0
+            || quote.propertyDetails.numLargeItems > 0
+            || quote.propertyDetails.dismantling
+            || quote.propertyDetails.reassembly
+          ) && (
+            <div className="bg-white rounded-3xl border border-ink-100 p-5 lg:p-7">
+              <h3 className="font-display font-bold text-sm mb-3 uppercase tracking-wider text-ink-500 flex items-center gap-2">
+                <Home className="w-3.5 h-3.5" /> Property &amp; furniture
+              </h3>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {quote.propertyDetails.bedrooms && <Detail icon={Home} label="Bedrooms" value={quote.propertyDetails.bedrooms} />}
+                {quote.propertyDetails.numBeds > 0 && <Detail icon={Bed} label="Beds" value={quote.propertyDetails.numBeds} />}
+                {quote.propertyDetails.numSofas > 0 && <Detail icon={Sofa} label="Sofas" value={quote.propertyDetails.numSofas} />}
+                {quote.propertyDetails.numLargeItems > 0 && <Detail icon={Package} label="Large items" value={quote.propertyDetails.numLargeItems} />}
+                {quote.propertyDetails.dismantling && <Detail icon={Wrench} label="Dismantling" value={<span className="text-ember-600 font-semibold">Required</span>} />}
+                {quote.propertyDetails.reassembly  && <Detail icon={Wrench} label="Reassembly"  value={<span className="text-ember-600 font-semibold">Required</span>} />}
+              </div>
+            </div>
+          )}
+
+          {/* Packing materials */}
+          {quote.packingMaterials?.requested && (
+            <div className="bg-white rounded-3xl border border-ink-100 p-5 lg:p-7">
+              <h3 className="font-display font-bold text-sm mb-3 uppercase tracking-wider text-ink-500 flex items-center gap-2">
+                <Package className="w-3.5 h-3.5" /> Packing materials
+              </h3>
+              <div className="grid sm:grid-cols-2 gap-2 text-sm">
+                {quote.packingMaterials.smallBoxes > 0      && <PackingLine label="Small boxes"        qty={quote.packingMaterials.smallBoxes} />}
+                {quote.packingMaterials.mediumBoxes > 0     && <PackingLine label="Medium boxes"       qty={quote.packingMaterials.mediumBoxes} />}
+                {quote.packingMaterials.largeBoxes > 0      && <PackingLine label="Large boxes"        qty={quote.packingMaterials.largeBoxes} />}
+                {quote.packingMaterials.bubbleWrapRolls > 0 && <PackingLine label="Bubble wrap rolls"  qty={quote.packingMaterials.bubbleWrapRolls} />}
+                {quote.packingMaterials.tapeRolls > 0       && <PackingLine label="Tape rolls"         qty={quote.packingMaterials.tapeRolls} />}
+              </div>
+              {quote.packingMaterials.total > 0 && (
+                <div className="mt-3 pt-3 border-t border-ink-100 flex items-center justify-between text-sm">
+                  <span className="text-ink-600">Packing subtotal</span>
+                  <span className="font-bold text-ember-600">£{quote.packingMaterials.total}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Parking */}
+          {quote.propertyDetails?.parkingAvailable && (
+            <div className={`rounded-3xl border p-5 lg:p-7 ${quote.propertyDetails.parkingAvailable === 'no' ? 'bg-amber-50 border-amber-200' : 'bg-white border-ink-100'}`}>
+              <h3 className="font-display font-bold text-sm mb-3 uppercase tracking-wider text-ink-500 flex items-center gap-2">
+                <Car className="w-3.5 h-3.5" /> Parking
+              </h3>
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${quote.propertyDetails.parkingAvailable === 'yes' ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+                  {quote.propertyDetails.parkingAvailable === 'yes' ? <Check className="w-4 h-4 text-white" /> : <AlertCircle className="w-4 h-4 text-white" />}
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-ink-900">
+                    Parking available: {quote.propertyDetails.parkingAvailable === 'yes' ? 'Yes' : 'No'}
+                  </div>
+                  {quote.propertyDetails.parkingAvailable === 'no' && (
+                    <div className="text-xs text-ink-700 mt-1">
+                      Additional waiting charges may apply if parking is unavailable on the day.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {quote.notes && (
             <div className="bg-white rounded-3xl border border-ink-100 p-5 lg:p-7">
@@ -186,6 +290,15 @@ function Detail({ icon: Icon, label, value }) {
         <div className="text-[10px] uppercase tracking-wider text-ink-500 font-semibold">{label}</div>
         <div className="text-sm font-semibold text-ink-900">{value}</div>
       </div>
+    </div>
+  );
+}
+
+function PackingLine({ label, qty }) {
+  return (
+    <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-ink-50">
+      <span className="text-ink-700">{label}</span>
+      <span className="font-bold text-ink-900">× {qty}</span>
     </div>
   );
 }

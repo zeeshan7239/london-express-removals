@@ -42,7 +42,7 @@ export default function PrivacyPage() {
 
           <h2 className="font-display font-bold text-2xl mt-8 mb-3">Data retention</h2>
           <p className="text-ink-700 leading-relaxed mb-4">
-            We retain booking records for 7 years for tax and insurance purposes, then delete them. Marketing
+            We retain booking records for 7 years for tax and legal purposes, then delete them. Marketing
             subscription preferences are retained until you unsubscribe.
           </p>
         </div>

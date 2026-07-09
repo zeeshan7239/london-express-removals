@@ -1,11 +1,13 @@
 import Link from 'next/link';
-import { Shield, Clock, Banknote, HeartHandshake, ArrowRight } from 'lucide-react';
+import { Truck, Clock, Banknote, HeartHandshake, ArrowRight, Shield, Users, MapPin } from 'lucide-react';
 
 const features = [
-  { icon: Shield, title: 'Fully Professionals', desc: 'Trusted professionals with 10,000+ successful moves completed.' },
-  { icon: Clock, title: 'On time, every time', desc: 'Same-day quotes, punctual arrivals, no waiting.' },
-  { icon: Banknote, title: 'Transparent pricing', desc: 'See your final price before booking — no surprises.' },
-  { icon: HeartHandshake, title: 'Friendly movers', desc: 'Vetted, polite professionals who treat your stuff like their own.' },
+  { icon: Users,         title: 'Professional team',        desc: 'Experienced, vetted movers who treat your belongings with care on every job.' },
+  { icon: Clock,         title: 'On time, every time',      desc: 'Same-day quotes, punctual arrivals, no waiting around.' },
+  { icon: Banknote,      title: 'Transparent pricing',      desc: 'See your final price before booking — no surprises, no hidden charges.' },
+  { icon: HeartHandshake,title: 'Customer satisfaction',    desc: 'Hundreds of happy customers. We don\'t stop until you\'re satisfied.' },
+  { icon: Truck,         title: 'Fully equipped vehicles',  desc: 'Modern, well-maintained vans with all the equipment needed for a smooth move.' },
+  { icon: MapPin,        title: 'London & nationwide',      desc: 'From local London moves to long-distance UK removals — we cover it all.' },
 ];
 
 export default function WhyChooseUs() {
@@ -20,8 +22,7 @@ export default function WhyChooseUs() {
               <span className="text-ember-600">We make it less so.</span>
             </h2>
             <p className="text-ink-600 leading-relaxed mb-6">
-              Thousands of Londoners trust us with their belongings every year.
-              Here's why we're different.
+              Hundreds of customers across London trust us with their belongings every month. Here's why we're different.
             </p>
             <Link href="/booking" className="btn-primary">
               Book your move <ArrowRight className="w-4 h-4" />

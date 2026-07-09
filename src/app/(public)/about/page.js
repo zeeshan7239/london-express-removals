@@ -4,11 +4,11 @@ import { Truck, Award, Users, Heart } from 'lucide-react';
 
 export const metadata = {
   title: 'About Us — London\'s Trusted Man & Van Service | London Express Removals',
-  description: 'Meet the team behind 10,000+ London moves. London Express Removals is a professional, fully insured removal company covering all London boroughs. Transparent pricing, same-day availability, 4.9/5 rated.',
+  description: 'Meet the team behind hundreds of London moves. London Express Removals is a professional, professional removal company covering all London boroughs. Transparent pricing, same-day availability, 4.9/5 rated.',
   alternates: { canonical: '/about' },
   openGraph: {
     title: 'About Us — London\'s Trusted Man & Van Service | London Express Removals',
-    description: 'Meet the team behind 10,000+ London moves. Fully insured, transparent pricing, same-day availability across all London boroughs.',
+    description: 'Meet the team behind hundreds of London moves. Professional, transparent pricing, same-day availability across all London boroughs.',
     url: '/about',
   },
 };
@@ -33,7 +33,7 @@ export default function AboutPage() {
       <PageHeader
         eyebrow="About us"
         title="About Us — London's Trusted Man & Van Service | London Express Removals"
-        subtitle="Professional man and van removals in London with 10,000+ completed moves. Fully professionals, affordable transparent pricing, same-day removals across London and surrounding areas."
+        subtitle="Professional man and van removals in London with 10,000+ completed moves. Professional team, affordable transparent pricing, same-day removals across London and surrounding areas."
       />
 
       <section className="py-16 lg:py-20">

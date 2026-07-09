@@ -8,7 +8,7 @@ export const metadata = {
   alternates: { canonical: '/custom-quote' },
   openGraph: {
     title: 'Request a Custom Removal Quote | London Express Removals',
-    description: 'Complex move or outside the M25? Request a custom quote — we respond within 30 minutes, 7 days a week.',
+    description: 'Large or complex move? Request a custom quote — we respond within 30 minutes, 7 days a week.',
     url: '/custom-quote',
   },
 };

@@ -1,13 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
   images: {
     remotePatterns: [
+      // Allow all HTTPS image sources (covers Cloudinary, getAddress, any CDN)
       { protocol: 'https', hostname: '**' },
+      // Cloudinary explicit (belt-and-braces)
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
     ],
   },
-  // Hide the "N" Next.js dev tools indicator in the bottom-left during development.
-  // This indicator never appears in production builds — disabling here is purely cosmetic.
+
+  // Hide the Next.js "N" dev indicator
   devIndicators: false,
 };
 

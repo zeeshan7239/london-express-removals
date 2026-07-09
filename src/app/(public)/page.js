@@ -8,9 +8,14 @@ import FAQ from '@/components/home/FAQ';
 import CTABanner from '@/components/home/CTABanner';
 
 export const metadata = {
-  title: 'Reliable Man & Van Service Across London',
-  description: 'Premium man & van removals in London. Instant pricing, fully professionals, transparent fees. House moves, flats, offices, single items. Same-day service available.',
+  title: 'Removals London — Man & Van from £100 | London Express Removals',
+  description: 'Removals across all London boroughs from £100. House moves, flat moves, office relocations and man & van service. Same-day available, transparent fixed pricing, no hidden fees. Instant quote online.',
   alternates: { canonical: '/' },
+  openGraph: {
+    title: 'Removals London — Man & Van from £100 | London Express Removals',
+    description: 'Removals across all London boroughs from £100. House moves, flat moves, office relocations and man & van service. Same-day available, no hidden fees.',
+    url: '/',
+  },
 };
 
 export default function HomePage() {
