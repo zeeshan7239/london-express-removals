@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Phone, Truck, ChevronDown, MapPin } from 'lucide-react';
+import { Menu, X, Phone, ChevronDown, MapPin } from 'lucide-react';
+import Image from 'next/image';
 import UserMenu from './UserMenu';
 import { siteConfig } from '@/lib/utils/siteConfig';
 
@@ -111,15 +112,19 @@ export default function Navbar() {
       }`}>
         <div className="container-wide flex items-center justify-between h-16 lg:h-20">
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ink-900 to-ink-800 flex items-center justify-center shadow-pop group-hover:rotate-3 transition">
-              <Truck className="w-5 h-5 text-ember-400" />
-            </div>
-            <div className="font-display font-bold text-base lg:text-lg leading-tight">
-              London Express<br className="hidden sm:inline" />
-              <span className="text-ember-500 sm:text-inherit"> Removals</span>
-            </div>
+          {/* Logo — the image already contains the "London Express Removals"
+              wordmark, so no duplicate text next to it. Height scales from
+              40px on mobile → 44px on tablet → 48px on desktop; width is
+              auto so the aspect ratio stays intact. */}
+          <Link href="/" className="flex items-center group shrink-0" aria-label="London Express Removals — home">
+            <Image
+              src="/logo.png"
+              alt="London Express Removals"
+              width={805}
+              height={805}
+              priority
+             className="h-12 sm:h-20 md:h-28 lg:h-36 mt-4 w-auto object-contain select-none transition-transform duration-200 group-hover:rotate-3"
+            />
           </Link>
 
           {/* Desktop nav */}
