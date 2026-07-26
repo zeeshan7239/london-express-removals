@@ -123,10 +123,17 @@ export default async function BlogPage() {
               >
                 {/* Cover — uses gradient by default, real image if uploaded */}
                 <div className={`aspect-[16/10] bg-gradient-to-br ${b.coverGradient || 'from-ember-400 to-ember-600'} relative`}>
-                  {b.coverImage && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={b.coverImage} alt={b.title} className="w-full h-full object-cover" loading="lazy" />
-                  )}
+                 {b.coverImage && (
+  // eslint-disable-next-line @next/next/no-img-element
+  <img
+    src={b.coverImage}
+    alt={b.title}
+    width={640}
+    height={400}
+    className="w-full h-full object-cover"
+    loading="lazy"
+  />
+)}
                   <div className="absolute top-4 left-4">
                     <span className="px-3 py-1 rounded-full bg-white/90 backdrop-blur text-xs font-bold uppercase tracking-wider text-ink-900">
                       {b.category}

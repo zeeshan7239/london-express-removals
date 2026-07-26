@@ -101,14 +101,16 @@ export default async function BlogPostPage({ params }) {
         } text-white overflow-hidden`}
       >
         <div className="absolute inset-0 bg-grid-dark opacity-20" />
-        {blog.coverImage && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={blog.coverImage}
-            alt={blog.title}
-            className="absolute inset-0 w-full h-full object-cover opacity-30"
-          />
-        )}
+    {blog.coverImage && (
+  // eslint-disable-next-line @next/next/no-img-element
+  <img
+    src={blog.coverImage}
+    alt={blog.title}
+    width={1920}
+    height={1080}
+    className="absolute inset-0 w-full h-full object-cover opacity-30"
+  />
+)}
         <div className="container-wide relative py-20 lg:py-28 max-w-4xl">
           <Link
             href="/blog"
