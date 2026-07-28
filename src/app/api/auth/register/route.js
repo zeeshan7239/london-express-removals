@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db/connect.js';
 import User from '@/lib/models/User.js';
 import { buildCookieOptions } from '@/lib/middleware/auth.js';
 import { sendWelcomeEmail } from '@/lib/services/emailService.js';
+import { isEmailVerified } from '@/lib/services/otpService.js';
 
 export async function POST(req) {
   try {
@@ -22,6 +23,18 @@ export async function POST(req) {
     }
 
     await connectDB();
+
+    // ── Server-side email verification check ────────────────────────────
+    // Even if someone bypasses the frontend, we reject registration unless
+    // this email was verified via OTP in the last 30 minutes.
+    const verified = await isEmailVerified(email);
+    if (!verified) {
+      return NextResponse.json(
+        { success: false, message: 'Please verify your email address before creating an account' },
+        { status: 400 }
+      );
+    }
+
     if (await User.findOne({ email })) {
       return NextResponse.json(
         { success: false, message: 'Email already registered' },
@@ -29,7 +42,14 @@ export async function POST(req) {
       );
     }
 
-    const user = await User.create({ fullName, email, phone, password });
+    // Mark the account as verified since we just confirmed the email above
+    const user = await User.create({
+      fullName,
+      email,
+      phone,
+      password,
+      isVerified: true,
+    });
     sendWelcomeEmail(user).catch(() => {});
 
     const token = user.getSignedJwtToken();
