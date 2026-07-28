@@ -100,6 +100,9 @@ export default function BookingPage() {
   const [reassembly,   setReassembly]   = useState(false);
   const [parking,      setParking]      = useState(''); // '', 'yes', 'no'
 
+  
+
+
   const prevPriceRef = useRef(null);
 
   const [data, setData] = useState({
@@ -147,6 +150,75 @@ export default function BookingPage() {
       setData((prev) => ({ ...prev, preferredTime: '' }));
     }
   }, [availableTimeSlots, data.preferredTime]);
+
+   // ── Email verification state ────────────────────────────────────────
+  // Logged-in users skip verification entirely (their email is already trusted).
+  // Guests must send + enter a 6-digit code before they can submit.
+  const [otpSent, setOtpSent]           = useState(false);
+  const [otpCode, setOtpCode]           = useState('');
+  const [otpVerified, setOtpVerified]   = useState(false);
+  const [otpSending, setOtpSending]     = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpCooldown, setOtpCooldown]   = useState(0); // seconds
+
+  // If the user changes their email after verifying, invalidate the verification
+  useEffect(() => {
+    if (otpVerified) {
+      setOtpVerified(false);
+      setOtpSent(false);
+      setOtpCode('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.customer.email]);
+
+  // Countdown timer for the resend cooldown
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const t = setTimeout(() => setOtpCooldown(s => Math.max(0, s - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [otpCooldown]);
+
+  // Handlers
+  const handleSendOTP = async () => {
+    if (!isValidEmail(data.customer.email)) {
+      return toast.error('Please enter a valid email first');
+    }
+    setOtpSending(true);
+    try {
+      await api.post('/verify-email/send', { email: data.customer.email });
+      setOtpSent(true);
+      setOtpCooldown(60);
+      toast.success('Code sent — check your inbox (and spam folder)');
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Could not send code';
+      if (err.response?.data?.secondsLeft) {
+        setOtpCooldown(err.response.data.secondsLeft);
+      }
+      toast.error(msg);
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (!/^\d{6}$/.test(otpCode.trim())) {
+      return toast.error('Enter the 6-digit code');
+    }
+    setOtpVerifying(true);
+    try {
+      await api.post('/verify-email/verify', {
+        email: data.customer.email,
+        code: otpCode.trim(),
+      });
+      setOtpVerified(true);
+      toast.success('Email verified ✓');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Wrong code');
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
 
   const set = (path, value) => {
     setData((prev) => {
@@ -282,12 +354,15 @@ export default function BookingPage() {
         return null;
       }
       case 4: return null; // property/packing details all optional
-      case 5: {
+       case 5: {
         if (!data.customer.name?.trim())          return { message: 'Please enter your full name.',          fieldId: 'customer-name' };
         if (!isValidEmail(data.customer.email))   return { message: 'Please enter a valid email address.',   fieldId: 'customer-email' };
         if (!isValidUKPhone(data.customer.phone)) return { message: 'Please enter a valid UK phone number.', fieldId: 'customer-phone' };
+        // Guests must verify email; logged-in users skip
+        if (!user && !otpVerified)                return { message: 'Please verify your email address before booking.', fieldId: 'otp-code' };
         return null;
       }
+
       default: return null;
     }
   };
@@ -836,6 +911,92 @@ export default function BookingPage() {
                             className={`input-field ${data.customer.phone && isValidUKPhone(data.customer.phone) ? 'border-emerald-500' : data.customer.phone ? 'border-red-400' : ''}`}
                             value={data.customer.phone} onChange={e => set('customer.phone', e.target.value)} />
                         </div>
+
+                           {/* Email verification — guests only */}
+                        {!user && (
+                          <div className="md:col-span-2">
+                            {!otpVerified ? (
+                              <div className="rounded-2xl border-2 border-ember-200 bg-ember-50/50 p-4">
+                                <div className="flex items-start gap-3 mb-3">
+                                  <ShieldCheck className="w-5 h-5 text-ember-600 shrink-0 mt-0.5" />
+                                  <div>
+                                    <div className="text-sm font-bold text-ink-900">Verify your email</div>
+                                    <div className="text-xs text-ink-600 leading-relaxed mt-0.5">
+                                      We'll send a 6-digit code to confirm your email address before we can accept your booking.
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {!otpSent ? (
+                                  <button
+                                    type="button"
+                                    onClick={handleSendOTP}
+                                    disabled={otpSending || !isValidEmail(data.customer.email)}
+                                    className="btn-primary w-full disabled:opacity-40 disabled:cursor-not-allowed"
+                                  >
+                                    {otpSending
+                                      ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
+                                      : <><Mail className="w-4 h-4" /> Send verification code</>}
+                                  </button>
+                                ) : (
+                                  <div className="space-y-3">
+                                    <div>
+                                      <label htmlFor="otp-code" className="text-xs font-semibold text-ink-600 mb-2 block">
+                                        Enter the 6-digit code we sent to {data.customer.email}
+                                      </label>
+                                      <input
+                                        id="otp-code"
+                                        type="text"
+                                        inputMode="numeric"
+                                        autoComplete="one-time-code"
+                                        pattern="\d{6}"
+                                        maxLength={6}
+                                        placeholder="000000"
+                                        value={otpCode}
+                                        onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                        className="input-field text-center tracking-[0.4em] font-mono font-bold text-lg"
+                                      />
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={handleVerifyOTP}
+                                        disabled={otpVerifying || otpCode.length !== 6}
+                                        className="btn-primary flex-1 disabled:opacity-40 disabled:cursor-not-allowed"
+                                      >
+                                        {otpVerifying
+                                          ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</>
+                                          : <><Check className="w-4 h-4" /> Verify code</>}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={handleSendOTP}
+                                        disabled={otpCooldown > 0 || otpSending}
+                                        className="px-4 py-2.5 rounded-full border-2 border-ink-200 text-sm font-bold text-ink-600 hover:border-ink-400 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                      >
+                                        {otpCooldown > 0 ? `Resend in ${otpCooldown}s` : 'Resend code'}
+                                      </button>
+                                    </div>
+                                    <p className="text-[11px] text-ink-500">
+                                      Didn't get the email? Check your spam folder or try resending after the cooldown.
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="rounded-2xl border-2 border-emerald-500 bg-emerald-50 p-4 flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                                  <Check className="w-5 h-5 text-white" strokeWidth={3} />
+                                </div>
+                                <div>
+                                  <div className="text-sm font-bold text-emerald-800">Email verified</div>
+                                  <div className="text-xs text-emerald-700">{data.customer.email}</div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-ink-600 mb-2 flex items-center gap-2">
                             <FileText className="w-3.5 h-3.5 text-ember-500" /> Notes <span className="text-ink-400 font-normal">(optional)</span>
@@ -866,18 +1027,19 @@ export default function BookingPage() {
                     className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
                     Continue <ChevronRight className="w-4 h-4" />
                   </button>
-                ) : (
+                 ) : (
                   <button onClick={() => {
                     const err = validateStep();
                     if (err) { toast.error(err.message); focusField(err.fieldId); return; }
                     submit();
-                  }} disabled={submitting}
+                  }} disabled={submitting || (!user && !otpVerified)}
                     className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
                     {submitting
                       ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</>
                       : <><Check className="w-4 h-4" /> Confirm booking</>}
                   </button>
                 )}
+
               </div>
             </div>
           </div>
