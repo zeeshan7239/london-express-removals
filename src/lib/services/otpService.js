@@ -55,11 +55,15 @@ export const sendOTP = async (email) => {
   const doc = await EmailOTP.create({ email: normalized, code, expiresAt });
 
   // Fire the email — don't await, so a slow SMTP doesn't block the response
-  sendEmail({
-    to: normalized,
-    subject: `Your verification code: ${code}`,
-    html: otpEmailTemplate(code, OTP_EXPIRY_MINUTES),
-  }).catch(err => console.error('OTP email failed:', err.message));
+sendEmail({
+  to: normalized,
+  subject: `Your verification code: ${code}`,
+  html: otpEmailTemplate(code, OTP_EXPIRY_MINUTES),
+}).then(info => {
+  console.log('✅ OTP email sent to:', normalized, 'MessageId:', info?.messageId);
+}).catch(err => {
+  console.error('❌ OTP email failed for:', normalized, err.message);
+});
 
   return {
     email: normalized,
