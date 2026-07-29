@@ -20,22 +20,15 @@ const getTransporter = () => {
     secure: port === 465,
     requireTLS: port === 587,
     auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 20_000,
+    connectionTimeout: 5_000,
+    greetingTimeout: 5_000,
+    socketTimeout: 10_000,
     tls: { minVersion: 'TLSv1.2' },
   });
-
-  // One-time verify on first use — surfaces config issues immediately
-  transporter.verify().then(
-    () => console.log('📧 SMTP ready'),
-    (err) => console.error('❌ SMTP verify failed:', err.message)
-  );
 
   globalThis.mailTransporter = transporter;
   return transporter;
 };
-
 export const sendEmail = async ({ to, subject, html, text }) => {
   try {
     const info = await getTransporter().sendMail({

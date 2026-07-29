@@ -50,7 +50,14 @@ export async function POST(req) {
       password,
       isVerified: true,
     });
-    sendWelcomeEmail(user).catch(() => {});
+   // ✅ CORRECT: Vercel waits for SMTP handshake before ending the execution context
+try {
+  await sendWelcomeEmail(user);
+} catch (err) {
+  console.error('Failed to send welcome email:', err);
+}
+
+return NextResponse.json({ success: true, message: 'User registered successfully' });
 
     const token = user.getSignedJwtToken();
     const res = NextResponse.json({
