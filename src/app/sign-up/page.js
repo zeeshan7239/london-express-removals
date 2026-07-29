@@ -92,15 +92,18 @@ export default function SignUpPage() {
     if (!otpVerified) return toast.error('Please verify your email before creating an account');
 
     setLoading(true);
-    try {
-      const user = await register(data);
-      toast.success(`Welcome, ${user.fullName.split(' ')[0]}!`);
-      router.push('/');
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
+   try {
+  const user = await register(data);
+  toast.success(`Welcome, ${user?.fullName?.split(' ')?.[0] || 'there'}!`);
+  // Wait for the toast to be visible + cookie to settle before redirecting
+ setTimeout(() => {
+  router.push('/');
+  router.refresh();  // ← force Next.js to refetch the page
+}, 1500);
+} catch (err) {
+  toast.error(err.response?.data?.message || 'Registration failed');
+  setLoading(false);
+}
   };
 
   return (

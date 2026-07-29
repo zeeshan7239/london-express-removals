@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import {
   quoteRequestCompanyTemplate,
   quoteConfirmationCustomerTemplate,
@@ -8,41 +8,78 @@ import {
   quoteRejectedTemplate,
 } from '@/lib/templates/emailTemplates.js';
 
-// Cache transporter across hot reloads in dev
-let transporter = globalThis.mailTransporter;
+/**
+ * Resend transactional email service.
+ *
+ * Replaces the previous nodemailer + Hostinger SMTP setup which timed out
+ * unreliably on Vercel serverless. Resend is built for this use case:
+ *   - Single HTTPS API call — no SMTP handshake
+ *   - Works instantly on cold starts
+ *   - Automatic retry + delivery tracking in the dashboard
+ *
+ * Function signatures are unchanged from the SMTP version, so the rest of the
+ * codebase (otpService, register route, quotes route) needs no edits.
+ */
 
-const getTransporter = () => {
-  if (transporter) return transporter;
-  const port = Number(process.env.EMAIL_PORT) || 587;
-  transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port,
-    secure: port === 465,
-    requireTLS: port === 587,
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    connectionTimeout: 5_000,
-    greetingTimeout: 5_000,
-    socketTimeout: 10_000,
-    tls: { minVersion: 'TLSv1.2' },
-  });
+// Lazy-instantiate the client — supports hot reload in dev
+let resend = globalThis.resendClient;
 
-  globalThis.mailTransporter = transporter;
-  return transporter;
+const getResend = () => {
+  if (resend) return resend;
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY is not set — email cannot be sent');
+  }
+  resend = new Resend(apiKey);
+  globalThis.resendClient = resend;
+  return resend;
 };
+
+/**
+ * From-address builder.
+ * Uses EMAIL_FROM_NAME + EMAIL_USER so existing env vars still work.
+ * Example: "London Express Removals <hello@londonexpressremovals.co.uk>"
+ */
+const buildFrom = () => {
+  const name = process.env.EMAIL_FROM_NAME || 'London Express Removals';
+  const address = process.env.EMAIL_USER || 'hello@londonexpressremovals.co.uk';
+  return `${name} <${address}>`;
+};
+
+/**
+ * Core send function — used by every other helper.
+ * Returns the Resend response on success, null on failure (so callers can
+ * fire-and-forget without unhandled rejections killing the request).
+ */
 export const sendEmail = async ({ to, subject, html, text }) => {
   try {
-    const info = await getTransporter().sendMail({
-      from: `"${process.env.EMAIL_FROM_NAME || 'London Express Removals'}" <${process.env.EMAIL_USER}>`,
-      to, subject, html, text: text || subject,
+    const client = getResend();
+    const { data, error } = await client.emails.send({
+      from: buildFrom(),
+      to: Array.isArray(to) ? to : [to],
+      subject,
+      html,
+      text: text || subject,
     });
-    console.log(`📧 Email sent: ${info.messageId}`);
-    return info;
+
+    if (error) {
+      console.error('❌ Resend error:', error.message || JSON.stringify(error));
+      return null;
+    }
+
+    console.log(`✅ Email sent to ${to} — id: ${data?.id}`);
+    return data;
   } catch (err) {
     console.error('❌ Email error:', err.message);
     return null;
   }
 };
 
+/**
+ * Send two emails in parallel when a new quote/booking comes in:
+ *   1. Notification to the company (admin sees it in the inbox)
+ *   2. Confirmation to the customer (they know we received it)
+ */
 export const sendQuoteEmails = async (quote) => {
   await Promise.all([
     sendEmail({

@@ -50,18 +50,19 @@ export async function POST(req) {
       password,
       isVerified: true,
     });
-   // ✅ CORRECT: Vercel waits for SMTP handshake before ending the execution context
-try {
-  await sendWelcomeEmail(user);
-} catch (err) {
-  console.error('Failed to send welcome email:', err);
-}
 
-return NextResponse.json({ success: true, message: 'User registered successfully' });
+    // Fire the welcome email but don't block the response on it —
+    // if SMTP is slow, we don't want the user waiting.
+    sendWelcomeEmail(user).catch((err) =>
+      console.error('Failed to send welcome email:', err.message)
+    );
 
+    // Sign a JWT and return it in both the body (for clients that want it)
+    // and as an HTTP-only cookie (so the browser is auto-authenticated).
     const token = user.getSignedJwtToken();
     const res = NextResponse.json({
       success: true,
+      message: 'User registered successfully',
       token,
       user: {
         id: user._id,

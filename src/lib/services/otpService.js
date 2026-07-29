@@ -60,7 +60,7 @@ sendEmail({
   subject: `Your verification code: ${code}`,
   html: otpEmailTemplate(code, OTP_EXPIRY_MINUTES),
 }).then(info => {
-  console.log('✅ OTP email sent to:', normalized, 'MessageId:', info?.messageId);
+   console.log('✅ OTP email sent to:', normalized, 'id:', info?.id);
 }).catch(err => {
   console.error('❌ OTP email failed for:', normalized, err.message);
 });

@@ -24,17 +24,19 @@ export function AuthProvider({ children }) {
     })();
   }, []);
 
-  const login = async (email, password) => {
-    const { data } = await api.post('/auth/login', { email, password });
-    setUser(data.user);
-    return data.user;
-  };
-
-  const register = async (payload) => {
-    const { data } = await api.post('/auth/register', payload);
-    setUser(data.user);
-    return data.user;
-  };
+ const login = async (email, password) => {
+  const { data } = await api.post('/auth/login', { email, password });
+  setUser(data.user);
+  // Small delay so the browser persists the cookie before any navigation
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return data.user;
+};
+const register = async (payload) => {
+  const { data } = await api.post('/auth/register', payload);
+  setUser(data.user);
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return data.user;
+};
 
   const logout = async () => {
     try { await api.post('/auth/logout'); } catch {}
