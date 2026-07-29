@@ -54,16 +54,23 @@ export const sendOTP = async (email) => {
 
   const doc = await EmailOTP.create({ email: normalized, code, expiresAt });
 
-  // Fire the email — don't await, so a slow SMTP doesn't block the response
-sendEmail({
-  to: normalized,
-  subject: `Your verification code: ${code}`,
-  html: otpEmailTemplate(code, OTP_EXPIRY_MINUTES),
-}).then(info => {
-   console.log('✅ OTP email sent to:', normalized, 'id:', info?.id);
-}).catch(err => {
-  console.error('❌ OTP email failed for:', normalized, err.message);
-});
+  // Await the email send — with Resend (single HTTPS API call), this is fast
+  // (~200ms) and ensures Vercel doesn't kill the serverless function before
+  // the email actually leaves. On the old SMTP setup this would have been
+  // slow, but on Resend it's the right call.
+  try {
+    const info = await sendEmail({
+      to: normalized,
+      subject: `Your verification code: ${code}`,
+      html: otpEmailTemplate(code, OTP_EXPIRY_MINUTES),
+    });
+    console.log('✅ OTP email sent to:', normalized, 'id:', info?.id);
+  } catch (err) {
+    console.error('❌ OTP email failed for:', normalized, err.message);
+    // Intentionally don't throw — the OTP is saved to DB, so if the email
+    // does eventually arrive the user can still use it. The frontend still
+    // sees a success and shows the "enter code" step.
+  }
 
   return {
     email: normalized,
