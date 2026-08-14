@@ -8,4 +8,5 @@ export const siteConfig = {
   phoneRaw: '+447459180023',
   whatsapp: 'https://wa.me/447459180023',
   email: 'bookings@londonexpressremovals.co.uk',
+  googleVerification: 'o8kTFpDhxvkD4lnRgFFlsfK90G1cyEb_b86jBJib8D8',
 };
