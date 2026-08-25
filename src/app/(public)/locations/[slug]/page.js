@@ -60,11 +60,7 @@ export default function LocationPage({ params }) {
       name: location.name,
     },
     priceRange: '££',
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '2400',
-    },
+   
   };
 
   const faqSchema = {
@@ -99,7 +95,7 @@ export default function LocationPage({ params }) {
       <section className="bg-ember-500 text-white py-4">
         <div className="container-wide">
           <div className="flex flex-wrap justify-center gap-6 lg:gap-12 text-sm font-semibold">
-            <span>⭐ 4.9/5 from 2,400+ reviews</span>
+            <span>Rated 5.0 by our customers ⭐⭐⭐⭐⭐</span>
             <span>🚐 Same-day moves available</span>
             <span>💷 Transparent fixed pricing</span>
             <span>📍 Covering all of {location.name}</span>

@@ -41,9 +41,10 @@ export default function Hero() {
               <span className="flex items-center gap-1.5 text-ink-200">
                 <span className="flex">
                   {[1,2,3,4,5].map((s) => <Star key={s} className="w-3.5 h-3.5 fill-ember-400 text-ember-400" />)}
+                
                 </span>
-                <span className="font-bold">4.9</span>
-                <span className="text-ink-400">(hundreds of reviews)</span>
+                <span className="font-bold">5.0 on Google</span>
+                <span className="text-ink-400"> · Trusted across London</span>
               </span>
               <span className="flex items-center gap-1.5 text-ink-300"><Shield className="w-3.5 h-3.5 text-emerald-400" /> Professional team</span>
               <span className="flex items-center gap-1.5 text-ink-300"><Clock className="w-3.5 h-3.5 text-ember-400" /> Same-day service</span>

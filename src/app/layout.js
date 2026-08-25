@@ -95,11 +95,7 @@ const businessSchema = {
     { '@type': 'Country', name: 'United Kingdom' },
   ],
   openingHours: 'Mo-Sa 07:00-21:00, Su 09:00-18:00',
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.9',
-    reviewCount: '2400',
-  },
+
 };
 
 export default function RootLayout({ children }) {

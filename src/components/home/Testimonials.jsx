@@ -2,20 +2,21 @@ import { Star, Quote } from 'lucide-react';
 
 const reviews = [
   {
-    name: 'Sarah M.', area: 'Camden',
-    text: 'Brilliant service from start to finish. The team arrived on time, were incredibly careful with our furniture, and the price was exactly what we agreed.',
+    name: 'Precious Benson', area: 'Dartford',
+    text: 'Very reliable service, I recommend 100%',
     rating: 5,
   },
   {
-    name: 'James K.', area: 'Hackney',
-    text: 'Used these guys for a 2-bed flat move. Fast, professional, and the price was unbeatable. Will definitely use again.',
+    name: 'Csilla Vegh', area: 'Hounslow',
+    text: '',
     rating: 5,
   },
   {
-    name: 'Priya S.', area: 'Wandsworth',
-    text: 'Moved my mum from her house of 30 years. The team were so patient and kind with her. Cannot recommend enough.',
+    name: 'Trang Nhung Vu', area: 'Gillingham',
+    text: '',
     rating: 5,
   },
+
 ];
 
 export default function Testimonials() {
@@ -26,11 +27,12 @@ export default function Testimonials() {
           <div className="section-eyebrow mb-3 mx-auto">Real reviews</div>
           <h2 className="heading-display text-3xl lg:text-4xl mb-3">Loved by Londoners</h2>
           <div className="flex items-center justify-center gap-2 text-sm">
-            <div className="flex">
+           
+            <span className="font-bold">Rated 5.0 </span>
+            <span className="text-ink-500">by our customers</span>
+             <div className="flex">
               {[1,2,3,4,5].map((s) => <Star key={s} className="w-4 h-4 fill-ember-500 text-ember-500" />)}
             </div>
-            <span className="font-bold">4.9/5</span>
-            <span className="text-ink-500">from 2,400+ verified reviews</span>
           </div>
         </div>
 
