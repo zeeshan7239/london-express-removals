@@ -14,7 +14,7 @@ export default function Hero() {
           {/* Left */}
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur text-xs font-semibold uppercase tracking-wider text-ember-400 mb-6">
-              <Sparkles className="w-3 h-3" /> Trusted by thousands of customers
+              <Sparkles className="w-3 h-3" /> Real reviews from real customers
             </div>
 
             <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight mb-6">
@@ -77,7 +77,7 @@ export default function Hero() {
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-xl bg-ember-50 border border-ember-200">
                     <span className="text-xs text-ember-700 uppercase tracking-wider font-semibold">Estimated total</span>
-                    <span className="font-display font-extrabold text-2xl text-ember-700">£189</span>
+                    <span className="font-display font-extrabold text-2xl text-ember-700">£180</span>
                   </div>
                 </div>
                 <Link href="/booking" className="btn-primary w-full justify-center">Get your instant quote</Link>

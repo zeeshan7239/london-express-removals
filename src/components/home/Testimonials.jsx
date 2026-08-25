@@ -8,15 +8,14 @@ const reviews = [
   },
   {
     name: 'Csilla Vegh', area: 'Hounslow',
-    text: '',
+    text: 'Left a 5-star rating on Google.',
     rating: 5,
   },
   {
     name: 'Trang Nhung Vu', area: 'Gillingham',
-    text: '',
+    text: 'Left a 5-star rating on Google.',
     rating: 5,
   },
-
 ];
 
 export default function Testimonials() {
@@ -27,12 +26,10 @@ export default function Testimonials() {
           <div className="section-eyebrow mb-3 mx-auto">Real reviews</div>
           <h2 className="heading-display text-3xl lg:text-4xl mb-3">Loved by Londoners</h2>
           <div className="flex items-center justify-center gap-2 text-sm">
-           
-            <span className="font-bold">Rated 5.0 </span>
-            <span className="text-ink-500">by our customers</span>
-             <div className="flex">
+            <div className="flex">
               {[1,2,3,4,5].map((s) => <Star key={s} className="w-4 h-4 fill-ember-500 text-ember-500" />)}
             </div>
+           <span className="font-bold">Rated 5 stars</span> <span className="text-ink-400">on Google</span>
           </div>
         </div>
 
