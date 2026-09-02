@@ -218,14 +218,34 @@ export default function BlogForm({ initial = {}, isEdit = false }) {
                 placeholder="https://..."
                 className="w-full px-3 py-2.5 rounded-xl border border-ink-200 text-sm focus:outline-none focus:border-ember-400"
               />
-              {form.coverImage && (
+              {/* {form.coverImage && (
                 <img
                   src={form.coverImage}
                   alt="Cover preview"
                   className="mt-3 w-full h-32 object-cover rounded-xl"
                   onError={(e) => { e.target.style.display = 'none'; }}
                 />
-              )}
+              )} */}
+              {form.coverImage && (
+  <div className="mt-3">
+    <img
+      src={form.coverImage}
+      alt="Cover preview"
+      className="w-full h-32 object-cover rounded-xl"
+      onError={(e) => {
+        e.target.style.display = 'none';
+        e.target.nextSibling.style.display = 'block';
+      }}
+      onLoad={(e) => {
+        e.target.style.display = 'block';
+        e.target.nextSibling.style.display = 'none';
+      }}
+    />
+    <div className="mt-1 text-xs text-red-500 hidden">
+      ⚠️ Image failed to load. Check the URL is correct and publicly accessible.
+    </div>
+  </div>
+)}
               <p className="text-xs text-ink-400 mt-1.5">Paste a direct image URL</p>
             </div>
 
