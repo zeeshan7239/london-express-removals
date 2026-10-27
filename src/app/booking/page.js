@@ -113,6 +113,23 @@ export default function BookingPage() {
     customer: { name: '', email: '', phone: '' },
   });
 
+  // ── Prefill from the homepage hero form (?type=&pickup=&delivery=&date=&time=) ──
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const type = q.get('type'), pu = q.get('pickup'), de = q.get('delivery');
+    if (!type && !pu && !de) return;
+    const num = (k) => (q.get(k) != null && q.get(k) !== '' ? Number(q.get(k)) : null);
+    setData((prev) => ({
+      ...prev,
+      movingType: movingTypes.some((t) => t.v === type) ? type : prev.movingType,
+      pickup:   { ...prev.pickup,   postcode: pu || prev.pickup.postcode,   lat: num('plat'), lon: num('plon') },
+      delivery: { ...prev.delivery, postcode: de || prev.delivery.postcode, lat: num('dlat'), lon: num('dlon') },
+      movingDate:    q.get('date') || prev.movingDate,
+      preferredTime: q.get('time') || prev.preferredTime,
+    }));
+    if (movingTypes.some((t) => t.v === type)) setStep(2);
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     setData((prev) => ({

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-label="Removals van">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#cbd5e1"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#0f172a"/></linearGradient>
+  </defs>
+  <ellipse cx="400" cy="352" rx="330" ry="18" fill="#000" opacity=".35"/>
+  <path d="M60 110 Q60 80 92 80 H520 V300 H60 Z" fill="url(#body)"/>
+  <path d="M520 80 H610 Q640 80 660 112 L720 200 Q740 224 740 252 V300 H520 Z" fill="url(#body)"/>
+  <path d="M545 100 H605 Q620 100 630 116 L680 192 H545 Z" fill="url(#glass)"/>
+  <rect x="60" y="244" width="680" height="24" fill="#F97316"/>
+  <rect x="60" y="268" width="680" height="32" fill="#0F172A" opacity=".85"/>
+  <text x="290" y="190" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="40" fill="#0F172A">LONDON EXPRESS</text>
+  <text x="290" y="228" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="26" fill="#F97316" letter-spacing="6">REMOVALS</text>
+  <rect x="722" y="220" width="22" height="18" rx="4" fill="#fde68a"/>
+  <g><circle cx="190" cy="300" r="46" fill="#0b1220"/><circle cx="190" cy="300" r="22" fill="#94a3b8"/>
+  <circle cx="620" cy="300" r="46" fill="#0b1220"/><circle cx="620" cy="300" r="22" fill="#94a3b8"/></g>
+</svg>
