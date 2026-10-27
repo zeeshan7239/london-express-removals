@@ -30,9 +30,9 @@ const pricingConfig = {
   ],
 
   teams: {
-    driverHelp: { label: 'Driver Help',   sublabel: '1 Man + Van',      basePrice: 130, includedHours: 2, extraHourRate: 60 },
-    twoMen:     { label: '2 Men Team',    sublabel: 'Most popular',     basePrice: 160, includedHours: 2, extraHourRate: 70 },
-    threeMen:   { label: '3 Men Team',    sublabel: 'For bigger moves', basePrice: 220, includedHours: 2, extraHourRate: 90 },
+    driverHelp: { label: 'Driver Help',   sublabel: '1 Man + Van',      basePrice: 130, includedHours: 2, extraHourRate: 65 },
+    twoMen:     { label: '2 Men Team',    sublabel: 'Most popular',     basePrice: 160, includedHours: 2, extraHourRate: 80 },
+    threeMen:   { label: '3 Men Team',    sublabel: 'For bigger moves', basePrice: 200, includedHours: 2, extraHourRate: 100 },
   },
 
   floorBands: {
@@ -53,26 +53,26 @@ const pricingConfig = {
     },
     1: {
       withLift:    { driverHelp: 0,  twoMen: 0,  threeMen: 0  },
-      withoutLift: { driverHelp: 10, twoMen: 10, threeMen: 15 },
+      withoutLift: { driverHelp: 10, twoMen: 15, threeMen: 20 },
     },
     2: {
-      withLift:    { driverHelp: 10, twoMen: 20, threeMen: 25 },
-      withoutLift: { driverHelp: 30, twoMen: 40, threeMen: 50 },
+      withLift:    { driverHelp: 5, twoMen: 10, threeMen: 15 },
+      withoutLift: { driverHelp: 15, twoMen: 30, threeMen: 50 },
     },
     3: {
-      withLift:    { driverHelp: 20, twoMen: 30, threeMen: 40 },
-      withoutLift: { driverHelp: 50, twoMen: 60, threeMen: 80 },
+      withLift:    { driverHelp: 10, twoMen: 20, threeMen: 30 },
+      withoutLift: { driverHelp: 20, twoMen: 35, threeMen:60  },
     },
   },
 
   shortTrip: {
     maxTravelMinutes: 60,
     maxFloorBand: 1,
-    eligiblePropertyTypes: ['Single Item', 'Studio', 'Storage'],
+    eligiblePropertyTypes: ['Single Item', 'Studio'],
     rates: {
       driverHelp: { basePrice: 100, includedHours: 2, extraHourRate: 50 },
-      twoMen:     { basePrice: 140, includedHours: 2, extraHourRate: 65 },
-      threeMen:   { basePrice: 180, includedHours: 2, extraHourRate: 80 },
+      twoMen:     { basePrice: 150, includedHours: 2, extraHourRate: 75 },
+      threeMen:   { basePrice: 180, includedHours: 2, extraHourRate: 90 },
     },
   },
 

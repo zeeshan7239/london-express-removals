@@ -5,6 +5,8 @@
  *   GOOGLE_PLACES_API_KEY  (required)
  *   GOOGLE_PLACE_ID        (preferred, starts with ChIJ)
  *   GOOGLE_PLACE_QUERY     (fallback when no Place ID, e.g. "London Express Removals London")
+ *   GOOGLE_PLACE_CID       (optional, numeric. With a query, only the listing with this CID is used,
+ *                           so a same-named business can never be shown by mistake)
  *
  * Returns null on any problem so the site falls back to the static reviews.
  * Errors are logged to the server log (Vercel → Logs) with the "[google-reviews]" prefix.
@@ -26,7 +28,7 @@ async function fetchPlace(key, placeId, query) {
       'X-Goog-Api-Key': key,
       'X-Goog-FieldMask': FIELDS.split(',').map((f) => `places.${f}`).join(','),
     },
-    body: JSON.stringify({ textQuery: query, regionCode: 'GB', maxResultCount: 1 }),
+    body: JSON.stringify({ textQuery: query, regionCode: 'GB', maxResultCount: 20 }),
     next: { revalidate: 21600 },
   });
 }
@@ -35,6 +37,7 @@ export async function getGoogleReviews() {
   const key = process.env.GOOGLE_PLACES_API_KEY?.trim();
   const placeId = process.env.GOOGLE_PLACE_ID?.trim();
   const query = process.env.GOOGLE_PLACE_QUERY?.trim();
+  const cid = process.env.GOOGLE_PLACE_CID?.trim();
   if (!key || (!placeId && !query)) return null;
 
   try {
@@ -44,9 +47,12 @@ export async function getGoogleReviews() {
       return null;
     }
     const json = await res.json();
-    const j = placeId ? json : json.places?.[0];
+    let j;
+    if (placeId) j = json;
+    else if (cid) j = (json.places || []).find((p) => (p.googleMapsUri || '').includes(`cid=${cid}`));
+    else j = json.places?.[0];
     if (!j) {
-      console.error('[google-reviews] No place found for query:', query);
+      console.error('[google-reviews] No matching place for query:', query, cid ? `(cid ${cid})` : '');
       return null;
     }
     const reviews = (j.reviews || [])
