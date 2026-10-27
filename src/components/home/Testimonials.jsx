@@ -1,4 +1,5 @@
 import { Star, Quote } from 'lucide-react';
+import { getGoogleReviews } from '@/lib/services/googleReviews';
 
 const reviews = [
   {
@@ -18,7 +19,9 @@ const reviews = [
   },
 ];
 
-export default function Testimonials() {
+export default async function Testimonials() {
+  const live = await getGoogleReviews();
+  const list = live ? live.reviews : reviews;
   return (
     <section className="py-20 lg:py-28 bg-gradient-to-b from-ink-50 to-white">
       <div className="container-wide">
@@ -29,13 +32,19 @@ export default function Testimonials() {
             <div className="flex">
               {[1,2,3,4,5].map((s) => <Star key={s} className="w-4 h-4 fill-ember-500 text-ember-500" />)}
             </div>
-           <span className="font-bold">Rated 5 stars</span> <span className="text-ink-400">on Google</span>
+           <span className="font-bold">{live?.rating ? `${live.rating.toFixed(1)} rating` : 'Rated 5 stars'}</span>
+            <span className="text-ink-400">
+              {live?.count ? ` from ${live.count} Google reviews` : ' on Google'}
+            </span>
+            {live?.url && (
+              <a href={live.url} target="_blank" rel="noopener noreferrer" className="text-ember-600 font-semibold hover:underline ml-1">See all</a>
+            )}
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5">
-          {reviews.map((r) => (
-            <div key={r.name} className="bg-white rounded-3xl p-6 border border-ink-100 hover:shadow-soft transition">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {list.slice(0, 6).map((r, idx) => (
+            <div key={`${r.name}-${idx}`} className="bg-white rounded-3xl p-6 border border-ink-100 hover:shadow-soft transition">
               <Quote className="w-7 h-7 text-ember-500 mb-3" />
               <div className="flex mb-3">
                 {Array(r.rating).fill(0).map((_, i) => (
@@ -44,9 +53,14 @@ export default function Testimonials() {
               </div>
               <p className="text-ink-700 text-sm leading-relaxed mb-4">{r.text}</p>
               <div className="flex items-center gap-3 pt-4 border-t border-ink-100">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-ember-500 to-ember-600 flex items-center justify-center text-white text-xs font-bold">
-                  {r.name[0]}
-                </div>
+                {r.photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={r.photo} alt="" referrerPolicy="no-referrer" className="w-9 h-9 rounded-full object-cover" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-ember-500 to-ember-600 flex items-center justify-center text-white text-xs font-bold">
+                    {r.name[0]}
+                  </div>
+                )}
                 <div>
                   <div className="font-semibold text-sm">{r.name}</div>
                   <div className="text-xs text-ink-500">{r.area}</div>
@@ -55,6 +69,7 @@ export default function Testimonials() {
             </div>
           ))}
         </div>
+        {live && <p className="text-center text-xs text-ink-400 mt-6">Reviews from Google</p>}
       </div>
     </section>
   );
