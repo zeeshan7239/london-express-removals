@@ -5,7 +5,7 @@ import { siteConfig } from '@/lib/utils/siteConfig';
 import HeroBookingForm from './HeroBookingForm';
 
 // To use your own van photo: put it in /public and change this path (e.g. '/hero-van.png').
-const HERO_VAN_SRC = '/van.png';
+const HERO_VAN_SRC = '/hero-van.svg';
 const IS_SVG = HERO_VAN_SRC.endsWith('.svg');
 
 export default function Hero() {
