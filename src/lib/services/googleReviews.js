@@ -56,7 +56,7 @@ export async function getGoogleReviews() {
       return null;
     }
     const reviews = (j.reviews || [])
-      .filter((r) => (r.rating || 0) >= 4 && r.text?.text)
+      .filter((r) => r.text?.text)
       .map((r) => ({
         name: r.authorAttribution?.displayName || 'Google user',
         photo: r.authorAttribution?.photoUri || null,
@@ -65,7 +65,7 @@ export async function getGoogleReviews() {
         rating: r.rating,
       }));
     if (!reviews.length) {
-      console.error('[google-reviews] Place found but it has no 4-5 star reviews with text');
+      console.error('[google-reviews] Place found but it has no reviews with text');
       return null;
     }
     return { rating: j.rating ?? null, count: j.userRatingCount ?? null, url: j.googleMapsUri || null, reviews };

@@ -8,5 +8,7 @@ export const siteConfig = {
   phoneRaw: '+447459180023',
   whatsapp: 'https://wa.me/447459180023',
   email: 'bookings@londonexpressremovals.co.uk',
+  // Your Google Business Profile (used for the "See all reviews" button when live data isn't available)
+  googleProfileUrl: 'https://maps.app.goo.gl/Nn7BaJhX5cNwgf1JA',
   googleVerification: 'o8kTFpDhxvkD4lnRgFFlsfK90G1cyEb_b86jBJib8D8',
 };

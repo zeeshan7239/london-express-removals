@@ -3,12 +3,14 @@ import NextImage from 'next/image';
 import { Phone, Star, Shield, Clock, MapPin } from 'lucide-react';
 import { siteConfig } from '@/lib/utils/siteConfig';
 import HeroBookingForm from './HeroBookingForm';
+import { getGoogleReviews } from '@/lib/services/googleReviews';
 
 // To use your own van photo: put it in /public and change this path (e.g. '/hero-van.png').
 const HERO_VAN_SRC = '/van.png';
 const IS_SVG = HERO_VAN_SRC.endsWith('.svg');
 
-export default function Hero() {
+export default async function Hero() {
+  const live = await getGoogleReviews();
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-ink-950 via-ink-900 to-ink-800 text-white">
       <div className="absolute inset-0 bg-grid-dark opacity-30 pointer-events-none" />
@@ -40,7 +42,10 @@ export default function Hero() {
             <div className="hidden sm:flex flex-wrap items-center gap-x-5 gap-y-2 text-sm mb-6">
               <span className="flex items-center gap-1.5 text-ink-200">
                 <span className="flex">{[1, 2, 3, 4, 5].map((s) => <Star key={s} className="w-3.5 h-3.5 fill-ember-400 text-ember-400" />)}</span>
-                <span className="font-bold">5.0 on Google</span>
+                <span className="font-bold">
+                  {live?.rating ? `${live.rating.toFixed(1)} on Google` : '5.0 on Google'}
+                </span>
+                {live?.count ? <span className="text-ink-400">({live.count} reviews)</span> : null}
               </span>
               <span className="flex items-center gap-1.5 text-ink-300"><Shield className="w-3.5 h-3.5 text-emerald-400" /> Professional team</span>
               <span className="flex items-center gap-1.5 text-ink-300"><Clock className="w-3.5 h-3.5 text-ember-400" /> Same-day service</span>
