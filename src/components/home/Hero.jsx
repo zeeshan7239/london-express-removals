@@ -5,9 +5,8 @@ import { siteConfig } from '@/lib/utils/siteConfig';
 import HeroBookingForm from './HeroBookingForm';
 import { getGoogleReviews } from '@/lib/services/googleReviews';
 
-// To use your own van photo: put it in /public and change this path (e.g. '/hero-van.png').
-const HERO_VAN_SRC = '/van.png';
-const IS_SVG = HERO_VAN_SRC.endsWith('.svg');
+// Hero background photo (in /public). Replace the file to change it.
+const HERO_VAN_SRC = '/hero-van.webp';
 
 export default async function Hero() {
   const live = await getGoogleReviews();
@@ -19,10 +18,10 @@ export default async function Hero() {
 
       {/* Hero background image — fills the whole section; everything else sits on top */}
       <div className="absolute inset-0 pointer-events-none select-none" aria-hidden="true">
-        <NextImage src={HERO_VAN_SRC} alt="" fill priority unoptimized={IS_SVG} sizes="100vw"
-          className="object-cover object-center" />
+        <NextImage src={HERO_VAN_SRC} alt="" fill priority sizes="100vw"
+          className="object-cover object-[35%_center] lg:object-center" />
         {/* Dark overlay so text and form stay readable; lower the numbers to show more of the image */}
-        <div className="absolute inset-0 bg-gradient-to-r from-ink-950/85 via-ink-950/60 to-ink-950/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink-950/95 via-ink-950/75 to-ink-950/40" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink-950/60 via-transparent to-transparent" />
       </div>
 
