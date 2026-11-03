@@ -7,12 +7,12 @@ import {
 } from 'lucide-react';
 
 export const metadata = {
-  title: 'Removal Services London — House, Flat & Office Moves | London Express Removals',
-  description: 'Professional removal services across all London boroughs. House moves, flat moves, studio moves, office relocations, single-item delivery and storage runs. Fixed pricing from £100, same-day available. Get an instant quote.',
+  title: { absolute: 'Removal Services London | House, Flat & Office Moves' },
+  description: 'House, flat, studio and office removals across London, plus single items and storage. From £130 for the first two hours, then hourly. Instant quote.',
   alternates: { canonical: '/services' },
   openGraph: {
-    title: 'Removal Services London — House, Flat & Office Moves | London Express Removals',
-    description: 'Professional removal services across all London boroughs. Fixed pricing from £100, same-day available. House, flat, office, single-item and storage moves.',
+    title: 'Removal Services London | House, Flat & Office Moves',
+    description: 'Removal services across London. From £130 for the first two hours, then charged by the hour. Same-day available.',
     url: '/services',
   },
 };
@@ -23,7 +23,7 @@ const services = [
     icon: Home,
     title: 'Studio & Single-Room Moves',
     desc: 'Quick, affordable moves for studio flats and bedsits. Ideal for students and young professionals.',
-    features: ['1 mover + van', 'From £100', 'Same-day available', 'Secured and Safe'],
+    features: ['1 mover + van', 'From £130', 'Same-day available', 'Secured and Safe'],
   },
   {
     id: 'flat',
@@ -58,7 +58,7 @@ const services = [
     icon: Package,
     title: 'Single-Item Delivery',
     desc: 'Sofas, fridges, beds, anything you need moved across town.',
-    features: ['From £100', 'Same-day delivery', '1 or 2 movers', 'eBay/Marketplace pickups'],
+    features: ['From £130', 'Same-day delivery', '1 or 2 movers', 'eBay/Marketplace pickups'],
   },
 ];
 
@@ -67,8 +67,8 @@ export default function ServicesPage() {
     <>
       <PageHeader
         eyebrow="What we move"
-        title="Removal Services London — House, Flat & Office Moves  London Express Removals"
-        subtitle="Professional removal services across London. House moves, flat moves, office relocations & single items. Fixed pricing, fully Professionals. Get an instant quote."
+        title="Removal Services London — House, Flat & Office Moves"
+        subtitle="Professional removal services across London. House moves, flat moves, office relocations & single items. Transparent hourly pricing from £130 for the first two hours. Get an instant quote."
       />
 
       <section className="py-16 lg:py-20 bg-ink-50">

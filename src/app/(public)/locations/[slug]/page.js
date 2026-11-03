@@ -5,47 +5,60 @@ import PageHeader from '@/components/common/PageHeader';
 import CTABanner from '@/components/home/CTABanner';
 import { siteConfig } from '@/lib/utils/siteConfig';
 import { locations, getLocationBySlug } from '@/lib/data/locations';
+import { getNearbyLocations } from '@/lib/utils/locationLinks';
+import AreaGuide from '@/components/locations/AreaGuide';
+
+export const revalidate = 3600;
 
 // Generate all borough pages at build time
 export function generateStaticParams() {
   return locations.map((l) => ({ slug: l.slug }));
 }
 
-// Generate unique metadata per borough
-export function generateMetadata({ params }) {
-  const location = getLocationBySlug(params.slug);
+// Generate unique metadata per borough.
+// `title.absolute` stops the site-wide "| London Express Removals" suffix being added twice.
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const location = getLocationBySlug(slug);
   if (!location) return {};
+  const path = `/locations/${location.slug}`;
   return {
-    title: location.title,
+    title: { absolute: location.title },
     description: location.description,
-    alternates: { canonical: `/locations/${location.slug}` },
+    alternates: { canonical: path },
     openGraph: {
+      type: 'website',
+      locale: 'en_GB',
+      siteName: siteConfig.name,
       title: location.title,
       description: location.description,
-      url: `/locations/${location.slug}`,
+      url: path,
+      images: [{ url: '/hero-van.webp', width: 1536, height: 1024, alt: `${siteConfig.name} van` }],
     },
   };
 }
 
 const services = [
-  { title: 'Studio & Single-Room Moves', desc: 'Quick, affordable moves for studio flats and bedsits.', from: '£100' },
-  { title: 'Flat Moves', desc: `1–3 bed flat moves across ${''}.`, from: '£150' },
-  { title: 'House Moves', desc: 'Whole-home relocations done properly.', from: '£250' },
-  { title: 'Office Relocations', desc: 'Minimal-disruption office moves, weekends available.', from: 'Custom' },
-  { title: 'Storage Runs', desc: 'To/from storage facilities. Loading included.', from: '£120' },
-  { title: 'Single-Item Delivery', desc: 'Sofas, fridges, anything moved across town.', from: '£100' },
+  { title: 'Studio & Single-Room Moves', desc: 'Quick, affordable moves for studio flats and bedsits.' },
+  { title: 'Flat Moves', desc: 'One, two and three-bedroom flat moves, with help on stairs and in lifts.' },
+  { title: 'House Moves', desc: 'Whole-home relocations done properly, with a team size to suit.' },
+  { title: 'Office Relocations', desc: 'Minimal-disruption office moves. Request a custom quote.' },
+  { title: 'Storage Runs', desc: 'To and from storage facilities, with loading and unloading included.' },
+  { title: 'Single-Item Delivery', desc: 'Sofas, fridges and other large items moved across town.' },
 ];
 
 const whyUs = [
-  { title: 'Transparent pricing', desc: 'See your final price before booking — no surprises.' },
-  { title: 'Same-day available', desc: 'Book before noon, move today in most cases.' },
-  { title: 'Friendly movers', desc: 'Vetted, polite professionals who show up on time.' },
-  { title: '4.9★ rated', desc: 'Trusted by 2,400+ Londoners with a 4.9/5 average.' },
+  { title: 'Hourly pricing', desc: 'Prices start from £130 for the first two hours, then extra time is charged by the hour. Get your price online before you book.' },
+  { title: 'Same-day moves', desc: 'Often available when we have a team free. The booking form shows the earliest time left today.' },
+  { title: 'Friendly movers', desc: 'Professional, polite movers who care for your belongings.' },
+  { title: 'Instant online quote', desc: 'Enter your postcodes and details, get a price in about a minute and book your slot.' },
 ];
 
-export default function LocationPage({ params }) {
-  const location = getLocationBySlug(params.slug);
+export default async function LocationPage({ params }) {
+  const { slug } = await params;
+  const location = getLocationBySlug(slug);
   if (!location) notFound();
+  const nearby = getNearbyLocations(location.slug);
 
   // Structured data for this location page
   const localBusinessSchema = {
@@ -60,7 +73,6 @@ export default function LocationPage({ params }) {
       name: location.name,
     },
     priceRange: '££',
-   
   };
 
   const faqSchema = {
@@ -91,13 +103,12 @@ export default function LocationPage({ params }) {
         subtitle={location.hero.subtitle}
       />
 
-      {/* Stats bar */}
+      {/* Highlights bar (no rating claims) */}
       <section className="bg-ember-500 text-white py-4">
         <div className="container-wide">
-          <div className="flex flex-wrap justify-center gap-6 lg:gap-12 text-sm font-semibold">
-            <span>Rated 5.0 by our customers ⭐⭐⭐⭐⭐</span>
-            <span>🚐 Same-day moves available</span>
-            <span>💷 Transparent fixed pricing</span>
+          <div className="flex flex-wrap justify-center gap-x-6 lg:gap-x-12 gap-y-1 text-sm font-semibold">
+            <span>🚐 Same-day moves available when we have space</span>
+            <span>💷 From £130 for the first 2 hours</span>
             <span>📍 Covering all of {location.name}</span>
           </div>
         </div>
@@ -106,7 +117,7 @@ export default function LocationPage({ params }) {
       {/* About this area */}
       <section className="py-16 lg:py-20 bg-white">
         <div className="container-wide">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-ember-50 border border-ember-200 text-xs font-semibold uppercase tracking-wider text-ember-600 mb-4">
                 <MapPin className="w-3.5 h-3.5" /> {location.name}, {location.postcode}
@@ -114,7 +125,9 @@ export default function LocationPage({ params }) {
               <h2 className="font-display font-extrabold text-2xl lg:text-3xl text-ink-900 mb-4">
                 Removals in {location.name} — We Know the Area
               </h2>
-              <p className="text-ink-600 leading-relaxed mb-6">{location.about}</p>
+              {location.about.split('\n\n').map((para, i) => (
+                <p key={i} className="text-ink-600 leading-relaxed mb-4 last:mb-6">{para}</p>
+              ))}
               <Link
                 href="/booking"
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-ember-500 text-white font-bold shadow-glow-ember hover:-translate-y-0.5 transition"
@@ -172,7 +185,7 @@ export default function LocationPage({ params }) {
                 <p className="text-ink-600 text-sm leading-relaxed mb-4">{s.desc}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-ember-600 bg-ember-50 px-2.5 py-1 rounded-full">
-                    From {s.from}
+                    Hourly pricing
                   </span>
                   <Link
                     href="/booking"
@@ -204,6 +217,27 @@ export default function LocationPage({ params }) {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="py-16 lg:py-20 bg-white">
+        <div className="container-wide max-w-3xl">
+          <h2 className="font-display font-extrabold text-2xl lg:text-3xl text-ink-900 mb-4">
+            How much does a removal cost in {location.name}?
+          </h2>
+          <p className="text-ink-600 leading-relaxed mb-4">
+            Our pricing is hourly. Prices start from £130, which covers the first two hours with one mover and a van, and extra time
+            is charged by the hour. The final cost depends on the number of movers you choose, how many hours your move takes,
+            floors and lift access at both addresses, and the distance between them.
+            Enter your postcodes in our instant quote to see your price before you book.
+          </p>
+          <Link
+            href="/booking"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-ember-500 text-white font-bold shadow-glow-ember hover:-translate-y-0.5 transition"
+          >
+            Get your instant quote <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 
@@ -242,6 +276,31 @@ export default function LocationPage({ params }) {
         </div>
       </section>
 
+      {/* Area guide (renders only when matching blog posts exist) */}
+      <AreaGuide location={location} />
+
+      {/* Nearby areas */}
+      {nearby.length > 0 && (
+        <section className="py-12 bg-white border-t border-ink-100">
+          <div className="container-wide max-w-4xl">
+            <h2 className="font-display font-extrabold text-xl lg:text-2xl text-ink-900 mb-4">
+              Nearby areas we cover
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              {nearby.map((n) => (
+                <Link
+                  key={n.slug}
+                  href={`/locations/${n.slug}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink-100 px-4 py-2 text-sm font-semibold text-ink-800 hover:border-ember-500 hover:text-ember-600 transition"
+                >
+                  <MapPin className="w-3.5 h-3.5" /> Removals in {n.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Contact strip */}
       <section className="py-10 bg-white border-t border-ink-100">
         <div className="container-wide">
@@ -250,14 +309,22 @@ export default function LocationPage({ params }) {
               <p className="font-display font-bold text-lg text-ink-900">
                 Need a removal in {location.name}?
               </p>
-              <p className="text-ink-600 text-sm">Call us or get an instant quote online — no deposit, no commitment.</p>
+              <p className="text-ink-600 text-sm">Call or WhatsApp us, or get an instant quote online.</p>
             </div>
-            <div className="flex gap-3 shrink-0">
+            <div className="flex flex-wrap justify-center gap-3">
               <a
                 href={`tel:${siteConfig.phoneRaw}`}
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-full border-2 border-ink-200 text-ink-800 font-bold text-sm hover:border-ink-400 transition"
               >
                 <Phone className="w-4 h-4" /> {siteConfig.phone}
+              </a>
+              <a
+                href={siteConfig.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-full border-2 border-ink-200 text-ink-800 font-bold text-sm hover:border-ink-400 transition"
+              >
+                WhatsApp
               </a>
               <Link
                 href="/booking"

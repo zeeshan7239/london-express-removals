@@ -10,7 +10,7 @@ export const metadata = {
 export default function PrivacyPage() {
   return (
     <>
-      <PageHeader eyebrow="Legal" title="Privacy Policy" subtitle="Last updated: January 2026" />
+      <PageHeader image={false} eyebrow="Legal" title="Privacy Policy" subtitle="Last updated: January 2026" />
       <section className="py-16 lg:py-20">
         <div className="container-wide max-w-3xl prose prose-slate">
           <h2 className="font-display font-bold text-2xl mt-8 mb-3">What we collect</h2>

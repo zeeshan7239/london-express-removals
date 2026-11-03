@@ -9,7 +9,7 @@ export const metadata = {
 export default function TermsPage() {
   return (
     <>
-      <PageHeader eyebrow="Legal" title="Terms of Service" subtitle="Last updated: January 2026" />
+      <PageHeader image={false} eyebrow="Legal" title="Terms of Service" subtitle="Last updated: January 2026" />
       <section className="py-16 lg:py-20">
         <div className="container-wide max-w-3xl prose prose-slate">
           <h2 className="font-display font-bold text-2xl mt-8 mb-3">1. Booking & Cancellation</h2>

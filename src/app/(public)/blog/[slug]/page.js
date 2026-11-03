@@ -7,6 +7,7 @@ import Blog from '@/lib/models/Blog';
 import CTABanner from '@/components/home/CTABanner';
 import ShareButton from '@/components/common/ShareButton';
 import { siteConfig } from '@/lib/utils/siteConfig';
+import { locationForPost } from '@/lib/utils/locationLinks';
 
 export const revalidate = 300;
 
@@ -62,6 +63,7 @@ export default async function BlogPostPage({ params }) {
 
   // Convert Markdown content to HTML for rendering
   const contentHtml = marked(blog.content || '');
+  const area = locationForPost(blog);
 
   // Article structured data for Google rich results
   const articleSchema = {
@@ -186,6 +188,25 @@ export default async function BlogPostPage({ params }) {
             "
             dangerouslySetInnerHTML={{ __html: contentHtml }}
           />
+
+          {/* Location box — only when a tag or the slug matches a location page */}
+          {area && (
+            <div className="mt-12 rounded-2xl border-2 border-ember-500 bg-ember-50 p-6 sm:p-8">
+              <h2 className="font-display font-extrabold text-xl sm:text-2xl text-ink-900 mb-2">
+                Need removals in {area.name}?
+              </h2>
+              <p className="text-ink-700 leading-relaxed mb-5">
+                See our{' '}
+                <Link href={`/locations/${area.slug}`} className="text-ember-600 font-semibold hover:underline">
+                  removals in {area.name}
+                </Link>{' '}
+                page, or get an instant online quote for your move.
+              </p>
+              <Link href="/booking" className="btn-primary inline-flex">
+                Get a quote
+              </Link>
+            </div>
+          )}
 
           {/* Share */}
           <div className="mt-12 pt-8 border-t border-ink-100 flex items-center justify-between">

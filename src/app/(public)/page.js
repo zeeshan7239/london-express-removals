@@ -8,12 +8,13 @@ import FAQ from '@/components/home/FAQ';
 import CTABanner from '@/components/home/CTABanner';
 
 export const metadata = {
-  title: 'Removals London — Man & Van from £100 | London Express Removals',
-  description: 'Removals across all London boroughs from £100. House moves, flat moves, office relocations and man & van service. Same-day available, transparent fixed pricing, no hidden fees. Instant quote online.',
+  // No brand in the string: the site template adds " | London Express Removals".
+  title: 'Removals London — Man & Van from £130',
+  description: 'Removals across London from £130 for the first two hours, then hourly. Man and van for flats, houses and offices. Same-day available. Instant online quote.',
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Removals London — Man & Van from £100 | London Express Removals',
-    description: 'Removals across all London boroughs from £100. House moves, flat moves, office relocations and man & van service. Same-day available, no hidden fees.',
+    title: 'Removals London — Man & Van from £130 | London Express Removals',
+    description: 'Removals across London from £130 for the first two hours, then charged by the hour. Same-day available, no hidden fees.',
     url: '/',
   },
 };
