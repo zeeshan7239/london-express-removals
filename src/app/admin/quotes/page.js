@@ -124,6 +124,11 @@ export default function AdminQuotesPage() {
                         Custom
                       </span>
                     )}
+                    {q.flatPack?.required && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                        {q.flatPack.assemblyCharge != null ? 'Flat-pack quoted' : 'Flat-pack – quote needed'}
+                      </span>
+                    )}
                   </div>
                   <div className="text-xs text-ink-500 truncate">
                     {q.movingType} · {q.pickup?.postcode} → {q.delivery?.postcode}

@@ -37,7 +37,7 @@ export default function PrivacyPage() {
           <h2 className="font-display font-bold text-2xl mt-8 mb-3">Your rights</h2>
           <p className="text-ink-700 leading-relaxed mb-4">
             Under UK GDPR you can: request a copy of the data we hold about you, ask us to correct or delete your data,
-            and withdraw consent at any time. Email <a href="mailto:bookings@londonexpressremovals.co.uk" className="text-ember-600 underline">bookings@londonexpressremovals.co.uk</a> with any request.
+            and withdraw consent at any time. Email <a href="mailto:info@londonexpressremovals.co.uk" className="text-ember-600 underline">info@londonexpressremovals.co.uk</a> with any request.
           </p>
 
           <h2 className="font-display font-bold text-2xl mt-8 mb-3">Data retention</h2>

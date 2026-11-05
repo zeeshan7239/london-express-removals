@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/utils/api';
+import FlatPackDetails from '@/components/quote/FlatPackDetails';
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -232,6 +233,14 @@ export default function QuoteDetailPage() {
             </div>
           )}
 
+          {/* Flat-pack assembly — custom quote */}
+          {quote.flatPack?.required && (
+            <>
+              <FlatPackDetails flatPack={quote.flatPack} removalPrice={quote.estimatedPrice} audience="admin" />
+              <AssemblyChargePanel quote={quote} onSaved={load} />
+            </>
+          )}
+
           {/* Parking */}
           {quote.propertyDetails?.parkingAvailable && (
             <div className={`rounded-3xl border p-5 lg:p-7 ${quote.propertyDetails.parkingAvailable === 'no' ? 'bg-amber-50 border-amber-200' : 'bg-white border-ink-100'}`}>
@@ -290,6 +299,50 @@ function Detail({ icon: Icon, label, value }) {
         <div className="text-[10px] uppercase tracking-wider text-ink-500 font-semibold">{label}</div>
         <div className="text-sm font-semibold text-ink-900">{value}</div>
       </div>
+    </div>
+  );
+}
+
+function AssemblyChargePanel({ quote, onSaved }) {
+  const [charge, setCharge] = useState(quote.flatPack?.assemblyCharge ?? '');
+  const [note, setNote] = useState(quote.flatPack?.assemblyNote || '');
+  const [notify, setNotify] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (charge === '' || Number(charge) < 0) { toast.error('Enter the assembly charge.'); return; }
+    setSaving(true);
+    try {
+      const { data } = await api.post(`/quotes/${quote._id}/assembly`, { charge: Number(charge), note, notify });
+      toast.success(data.message);
+      onSaved();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Could not save');
+    } finally { setSaving(false); }
+  };
+
+  const removal = Number(quote.estimatedPrice) || 0;
+  return (
+    <div className="bg-white rounded-3xl border border-ink-100 p-5 lg:p-7">
+      <h3 className="font-display font-bold text-sm mb-3 uppercase tracking-wider text-ink-500">Assembly charge</h3>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="assembly-charge" className="text-xs font-semibold text-ink-600 mb-2 block">Assembly charge (£)</label>
+          <input id="assembly-charge" type="number" min="0" step="0.01" className="input-field"
+            value={charge} onChange={(e) => setCharge(e.target.value)} placeholder="e.g. 60" />
+        </div>
+        <div className="text-sm self-end pb-3 text-ink-600">
+          {charge !== '' && removal > 0 && <>Final price: <strong className="text-ink-900">£{removal + Number(charge)}</strong> (removal £{removal} + assembly £{Number(charge)})</>}
+        </div>
+      </div>
+      <label htmlFor="assembly-note" className="text-xs font-semibold text-ink-600 mt-4 mb-2 block">Note to customer (optional)</label>
+      <textarea id="assembly-note" rows={3} className="input-field resize-none text-sm" value={note} onChange={(e) => setNote(e.target.value)} />
+      <label className="flex items-center gap-2 mt-3 text-sm text-ink-700 cursor-pointer">
+        <input type="checkbox" checked={notify} onChange={(e) => setNotify(e.target.checked)} /> Email the updated quotation to the customer
+      </label>
+      <button onClick={save} disabled={saving} className="btn-primary !py-2.5 !px-5 text-sm mt-4 disabled:opacity-50">
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save assembly charge'}
+      </button>
     </div>
   );
 }

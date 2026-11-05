@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { MapPin, Flag, Calendar, Clock, Home, ChevronRight, AlertTriangle, Phone, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PostcodeAutocomplete from '@/components/quote/PostcodeAutocomplete';
-import { isInsideM25 } from '@/lib/services/pricingService';
+import useServiceArea from '@/components/quote/useServiceArea';
 import { getAvailableTimeSlots, formatTime12h } from '@/lib/utils/timeSlots';
 import { UK_POSTCODE_REGEX } from '@/lib/utils/validation';
 import { siteConfig } from '@/lib/utils/siteConfig';
@@ -43,9 +43,13 @@ export default function HeroBookingForm() {
     if (preferredTime && !slots.includes(preferredTime)) setPreferredTime('');
   }, [slots, preferredTime]);
 
-  const inside = (s) =>
-    s.postcode ? isInsideM25(s.postcode, s.lat != null ? { lat: s.lat, lon: s.lon } : null) : null;
-  const outside = inside(pickup) === false || inside(delivery) === false;
+  // Real location check done by our server (London region or inside the M25 boundary).
+  const area = useServiceArea([pickup.postcode, delivery.postcode]);
+  const pickupArea = area.statusFor(pickup.postcode);
+  const deliveryArea = area.statusFor(delivery.postcode);
+  const outside = pickupArea?.status === 'outside' || deliveryArea?.status === 'outside';
+  const unavailable = pickupArea?.status === 'unavailable' || deliveryArea?.status === 'unavailable';
+  const bothInside = pickupArea?.status === 'inside' && deliveryArea?.status === 'inside';
 
   const buildParams = () => {
     const p = new URLSearchParams();
@@ -63,7 +67,8 @@ export default function HeroBookingForm() {
     e.preventDefault();
     if (!UK_POSTCODE_REGEX.test(pickup.postcode.trim())) return toast.error('Enter a valid pick-up postcode.');
     if (!UK_POSTCODE_REGEX.test(delivery.postcode.trim())) return toast.error('Enter a valid delivery postcode.');
-    if (outside) return router.push(`/custom-quote?${buildParams()}`);
+    if (outside) return toast.error('This move is outside our London & M25 service area. Please request a custom quote.');
+    if (!bothInside) return toast.error(unavailable ? "We couldn't check your postcodes just now. Please try again." : 'Please wait while we check your postcodes.');
     if (!movingDate) return toast.error('Please choose your moving date.');
     if (sameDayClosed) return toast.error('Online booking for today is no longer available. Please select another date or contact us directly.');
     if (!preferredTime) return toast.error('Please choose a preferred time.');
@@ -88,22 +93,27 @@ export default function HeroBookingForm() {
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <PostcodeAutocomplete id="hero-pickup" label="Pick-up postcode" icon={MapPin} value={pickup.postcode}
+          <PostcodeAutocomplete id="hero-pickup" label="Pick-up postcode" icon={MapPin} value={pickup.postcode} areaStatus={pickupArea}
             onChange={(v) => setPickup({ postcode: v, lat: null, lon: null })}
             onSelect={(d) => d && setPickup((p) => ({ ...p, lat: d.latitude, lon: d.longitude }))} />
-          <PostcodeAutocomplete id="hero-delivery" label="Delivery postcode" icon={Flag} value={delivery.postcode}
+          <PostcodeAutocomplete id="hero-delivery" label="Delivery postcode" icon={Flag} value={delivery.postcode} areaStatus={deliveryArea}
             onChange={(v) => setDelivery({ postcode: v, lat: null, lon: null })}
             onSelect={(d) => d && setDelivery((p) => ({ ...p, lat: d.latitude, lon: d.longitude }))} />
         </div>
 
         {outside ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm">
-            <div className="flex items-start gap-2 font-semibold text-amber-900">
-              <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-              This move is outside the M25, so we quote it individually.
+          <div role="alert" className="rounded-2xl border-2 border-red-300 bg-red-50 p-4 text-sm">
+            <div className="flex items-start gap-2 text-ink-800">
+              <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-red-600" />
+              <p>
+                <strong className="text-ink-900">Your collection or delivery location is outside our standard London &amp; M25 service area.</strong>{' '}
+                We may still be able to help! Please contact us at{' '}
+                <a href={`mailto:${siteConfig.email}`} className="font-semibold text-ember-700 underline break-all">{siteConfig.email}</a>{' '}
+                to receive a personalised quotation.
+              </p>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href={`/custom-quote?${buildParams()}`} className="btn-primary !py-2 !px-4 text-sm">Request custom quote</Link>
+              <Link href={`/custom-quote?${buildParams()}`} className="btn-primary !py-2 !px-4 text-sm">Request a Custom Quote</Link>
               <a href={`https://wa.me/${siteConfig.phoneRaw.replace(/\D/g, '')}`} className="btn-ghost !py-2 !px-4 text-sm"><MessageCircle className="w-4 h-4" /> WhatsApp</a>
               <a href={`tel:${siteConfig.phoneRaw}`} className="btn-ghost !py-2 !px-4 text-sm"><Phone className="w-4 h-4" /> Call</a>
             </div>
@@ -132,7 +142,7 @@ export default function HeroBookingForm() {
         )}
 
         {!outside && (
-          <button type="submit" className="btn-primary w-full !py-4 text-base group">
+          <button type="submit" disabled={unavailable} className="btn-primary w-full !py-4 text-base group disabled:opacity-60">
             Get my instant price <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition" />
           </button>
         )}

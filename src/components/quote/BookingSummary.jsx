@@ -11,16 +11,21 @@ const formatDate = (d) => {
 /**
  * Sidebar summary.
  * `stops` is the single array of intermediate stops between pickup and delivery.
- * `packingTotal` is calculated internally in the booking page and added to
+ * Prices come from the server-side pricing engine (selectedTeam.breakdown).
  * the estimated total shown at the bottom of this card — the customer never
  * sees a per-item breakdown or unit prices in the form.
  */
 export default function BookingSummary({
   data, selectedTeam, hours,
-  packingTotal = 0, stops = [],
+  stops = [], services = {},
 }) {
   const hasMinimum = data.movingType && data.pickup?.postcode && data.delivery?.postcode;
-  const displayTotal = selectedTeam ? selectedTeam.total + packingTotal : null;
+  const displayTotal = selectedTeam ? selectedTeam.total : null;
+  const requested = [
+    services.packingService && 'Packing service',
+    services.dismantling && 'Furniture dismantling',
+    services.reassembly && 'Furniture reassembly',
+  ].filter(Boolean);
 
   return (
     <div className="bg-white rounded-3xl border border-ink-100 overflow-hidden">
@@ -69,9 +74,11 @@ export default function BookingSummary({
             {data.moversNeeded  && <Row icon={Users}    label="Movers"   value={data.moversNeeded} />}
             {hours              && <Row icon={Clock}    label="Duration" value={`${hours}h`} />}
 
-            {/* Packing — single discreet line showing total, no per-item breakdown */}
-            {packingTotal > 0 && (
-              <Row icon={Package} label="Packing materials" value={`Included · £${packingTotal}`} />
+            {services.flatPack && (
+              <Row icon={Package} label="Flat-pack assembly" value={<span className="text-amber-700 font-semibold">Custom quote required</span>} />
+            )}
+            {requested.length > 0 && (
+              <Row icon={Package} label="Extra services" value={requested.join(', ')} />
             )}
           </>
         ) : (
@@ -82,14 +89,24 @@ export default function BookingSummary({
         )}
       </div>
 
-      {displayTotal != null && (
+      {displayTotal != null && (<>
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
           className="bg-gradient-to-br from-ember-500 to-ember-600 text-white p-5">
           <div className="text-[11px] uppercase tracking-widest font-semibold text-ember-100 mb-1">Estimated total</div>
           <div className="font-display font-extrabold text-4xl leading-none mb-1.5">£{displayTotal}</div>
-          <div className="text-xs text-ember-100">{selectedTeam?.label} · {selectedTeam?.requestedHours}h included</div>
+          <div className="text-xs text-ember-100">{selectedTeam?.label} · {selectedTeam?.requestedHours}h booking</div>
         </motion.div>
-      )}
+        <div className="p-4 border-t border-ink-100">
+          <ul className="space-y-1.5 text-xs">
+            {(selectedTeam?.breakdown || []).map((l) => (
+              <li key={l.key || l.label} className="flex justify-between gap-3">
+                <span className="text-ink-600 min-w-0 break-words">{l.label}</span>
+                <span className="font-semibold text-ink-900 shrink-0">£{l.amount}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </>)}
     </div>
   );
 }

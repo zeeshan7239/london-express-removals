@@ -5,7 +5,7 @@ import {
   welcomeEmailTemplate,
   passwordResetTemplate,
   quoteAcceptedTemplate,
-  quoteRejectedTemplate,
+  quoteRejectedTemplate, assemblyQuoteTemplate,
 } from '@/lib/templates/emailTemplates.js';
 
 /**
@@ -38,11 +38,11 @@ const getResend = () => {
 /**
  * From-address builder.
  * Uses EMAIL_FROM_NAME + EMAIL_USER so existing env vars still work.
- * Example: "London Express Removals <hello@londonexpressremovals.co.uk>"
+ * Example: "London Express Removals <info@londonexpressremovals.co.uk>"
  */
 const buildFrom = () => {
   const name = process.env.EMAIL_FROM_NAME || 'London Express Removals';
-  const address = process.env.EMAIL_USER || 'hello@londonexpressremovals.co.uk';
+  const address = process.env.EMAIL_USER || 'info@londonexpressremovals.co.uk';
   return `${name} <${address}>`;
 };
 
@@ -84,7 +84,7 @@ export const sendQuoteEmails = async (quote) => {
   await Promise.all([
     sendEmail({
       to: process.env.COMPANY_EMAIL,
-      subject: `🚚 ${quote.kind === 'booking' ? 'New Booking' : 'New Quote Request'} — ${quote.customer.name}`,
+      subject: `🚚 ${quote.kind === 'booking' ? 'New Booking' : 'New Quote Request'}${quote.flatPack?.required ? ' [Flat-Pack Assembly – Custom Quote Required]' : ''} — ${quote.customer.name}`,
       html: quoteRequestCompanyTemplate(quote),
     }),
     sendEmail({
@@ -121,4 +121,10 @@ export const sendQuoteRejectedEmail = async (quote, message) =>
     to: quote.customer.email,
     subject: 'About your quote request — London Express Removals',
     html: quoteRejectedTemplate(quote, message),
+  });
+export const sendAssemblyQuoteEmail = async (quote) =>
+  sendEmail({
+    to: quote.customer.email,
+    subject: 'Your flat-pack assembly quotation — London Express Removals',
+    html: assemblyQuoteTemplate(quote),
   });

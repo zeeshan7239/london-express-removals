@@ -5,12 +5,15 @@ import { getCurrentUser } from '@/lib/middleware/auth.js';
 import { sendQuoteEmails } from '@/lib/services/emailService.js';
 import { sendWhatsAppNotification } from '@/lib/services/whatsappService.js';
 import { getAvailableTimeSlots } from '@/lib/utils/timeSlots.js';
+import { stripForbiddenFields } from '@/lib/services/bookingGuard.js';
+import { sanitiseFlatPack } from '@/lib/services/flatPack.js';
 
 export async function POST(req) {
   try {
     await connectDB();
     const body = await req.json();
-    const payload = { ...body, kind: 'quote' };
+    const payload = { ...stripForbiddenFields(body), kind: 'quote' };
+    payload.flatPack = sanitiseFlatPack(payload.flatPack);
 
     // Server-side same-day time validation (defence in depth)
     if (payload.movingDate) {

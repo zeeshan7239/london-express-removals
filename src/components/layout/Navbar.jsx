@@ -123,7 +123,7 @@ export default function Navbar() {
               width={805}
               height={805}
               priority
-             className="h-12 sm:h-20 md:h-28 lg:h-36 lg:mt-4 w-auto object-contain select-none transition-transform duration-200 group-hover:rotate-3"
+             className="h-14 sm:h-[88px] md:h-32 lg:h-40 lg:mt-4 w-auto max-w-[60vw] object-contain select-none transition-transform duration-200 group-hover:rotate-3"
             />
           </Link>
 

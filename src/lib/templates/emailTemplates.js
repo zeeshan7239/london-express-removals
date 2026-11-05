@@ -1,3 +1,4 @@
+import { FLAT_PACK_FLAG } from '../services/flatPack.js';
 // ── Layout wrapper ────────────────────────────────────────────────────────────
 const wrap = (body) => `
 <!DOCTYPE html>
@@ -14,7 +15,7 @@ const wrap = (body) => `
         <tr><td style="background:#0F172A;padding:24px;text-align:center;color:#94a3b8;font-size:12px;">
           © ${new Date().getFullYear()} London Express Removals · UK<br/>
           <a href="tel:+447459180023" style="color:#F97316;text-decoration:none;">Call us</a> ·
-          <a href="mailto:bookings@londonexpressremovals.co.uk" style="color:#F97316;text-decoration:none;">Email</a>
+          <a href="mailto:info@londonexpressremovals.co.uk" style="color:#F97316;text-decoration:none;">Email</a>
         </td></tr>
       </table>
     </td></tr></table>
@@ -111,9 +112,36 @@ const parkingBlock = (pd) => {
       </div>` : ''}`;
 };
 
+// Flat-pack assembly (custom quote) — items, flag and, once set, the assembly charge
+const flatPackItemsHtml = (fp) => {
+  return fp.items.map((i, n) => `
+    <div style="padding:10px 12px;background:#f8fafc;border-radius:6px;margin-bottom:8px;font-size:13px;color:#0F172A;">
+      <strong>${n + 1}. ${i.name}</strong> × ${i.quantity}${i.brand ? ` · ${i.brand}` : ''}<br/>
+      <span style="color:#64748b;">Collect from:</span> ${i.collectionLocation || '—'}<br/>
+      <span style="color:#64748b;">Assembly at delivery:</span> ${i.assemblyRequired === false ? 'No' : 'Yes'}
+      ${i.notes ? `<br/><span style="color:#64748b;">Notes:</span> ${i.notes}` : ''}
+    </div>`).join('');
+};
+
+const flatPackBlock = (fp, estimatedPrice, forAdmin = false) => {
+  if (!fp?.required || !fp.items?.length) return '';
+  const items = flatPackItemsHtml(fp);
+  const quoted = fp.assemblyCharge != null;
+  return sectionHeading('Flat-Pack Furniture Assembly') + `
+    <div style="padding:12px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:4px;color:#78350f;font-size:13px;margin-bottom:12px;">
+      <strong>${FLAT_PACK_FLAG}</strong><br/>
+      ${quoted
+        ? `Assembly charge: <strong>£${fp.assemblyCharge}</strong>${estimatedPrice != null ? ` · Final price: <strong>£${Number(estimatedPrice) + Number(fp.assemblyCharge)}</strong> (removal £${estimatedPrice} + assembly £${fp.assemblyCharge})` : ''}`
+        : forAdmin
+          ? 'Review the items and add the assembly charge in the admin dashboard. It is added on top of the removal price.'
+          : 'Our team will review your furniture and send a separate assembly quotation. It is added to your removal price and is not included in the total above.'}
+    </div>
+    ${items}`;
+};
+
 // ── Company / admin template ─────────────────────────────────────────────────
 export const quoteRequestCompanyTemplate = (q) => wrap(`
-  <h2 style="margin:0 0 8px;font-size:20px;">${q.kind === 'booking' ? '🚚 New Booking' : '📋 New Custom Quote'}</h2>
+  <h2 style="margin:0 0 8px;font-size:20px;">${q.kind === 'booking' ? '🚚 New Booking' : '📋 New Custom Quote'}${q.flatPack?.required ? ' · Flat-Pack Assembly' : ''}</h2>
   <p style="margin:0 0 24px;color:#64748b;font-size:14px;">
     ${q.kind === 'booking' ? 'A customer has booked through your online pricing system.' : 'A new customer has submitted a custom quote request.'}
   </p>
@@ -150,6 +178,7 @@ export const quoteRequestCompanyTemplate = (q) => wrap(`
 
   ${propertyDetailsBlock(q.propertyDetails)}
   ${packingLines(q.packingMaterials)}
+  ${flatPackBlock(q.flatPack, q.estimatedPrice, true)}
   ${parkingBlock(q.propertyDetails)}
 
   ${q.notes ? `
@@ -210,6 +239,7 @@ export const quoteConfirmationCustomerTemplate = (q) => wrap(`
 
   ${propertyDetailsBlock(q.propertyDetails)}
   ${packingLines(q.packingMaterials)}
+  ${flatPackBlock(q.flatPack, q.estimatedPrice, false)}
   ${parkingBlock(q.propertyDetails)}
 
   ${(q.propertyDetails?.dismantling || q.propertyDetails?.reassembly || q.packingMaterials?.requested) ? `
@@ -295,4 +325,20 @@ export const quoteRejectedTemplate = (q, message) => wrap(`
     </a>
   </div>
   <p style="margin:24px 0 0;font-size:13px;color:#94a3b8;text-align:center;">Reference: ${q._id}</p>
+`);
+
+// ── Flat-pack assembly quotation (sent when the admin sets the charge) ───────
+export const assemblyQuoteTemplate = (q) => wrap(`
+  <h2 style="margin:0 0 12px;font-size:22px;">Your flat-pack assembly quotation</h2>
+  <p style="color:#475569;font-size:15px;line-height:1.6;">
+    Hi ${q.customer.name.split(' ')[0]}, we've reviewed the furniture you want assembled. Here is your final price.
+  </p>
+  <table width="100%" cellspacing="0" cellpadding="0" style="font-size:14px;margin:16px 0;">
+    ${q.estimatedPrice != null ? row('Removal price', `£${q.estimatedPrice}`) : ''}
+    ${row('Flat-pack assembly', `£${q.flatPack.assemblyCharge}`)}
+    ${q.estimatedPrice != null ? row('<strong>Final price</strong>', `<strong>£${Number(q.estimatedPrice) + Number(q.flatPack.assemblyCharge)}</strong>`) : ''}
+  </table>
+  ${q.flatPack.assemblyNote ? `<div style="padding:12px;background:#f8fafc;border-radius:6px;font-size:14px;white-space:pre-wrap;">${String(q.flatPack.assemblyNote).replace(/[<>]/g, '')}</div>` : ''}
+  ${sectionHeading('Furniture')}${flatPackItemsHtml(q.flatPack)}
+  <p style="margin:24px 0 0;font-size:13px;color:#94a3b8;text-align:center;">Reference: ${q._id || 'pending'}</p>
 `);

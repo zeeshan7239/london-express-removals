@@ -13,6 +13,8 @@ import toast from 'react-hot-toast';
 import PageHeader from '@/components/common/PageHeader';
 import PostcodeAutocomplete from '@/components/quote/PostcodeAutocomplete';
 import AddressPicker from '@/components/quote/AddressPicker';
+import AddressAutocomplete from '@/components/quote/AddressAutocomplete';
+import FlatPackFields, { flatPackPayload, flatPackFormError } from '@/components/quote/FlatPackFields';
 import { isValidEmail, isValidUKPhone } from '@/lib/utils/validation';
 import { siteConfig } from '@/lib/utils/siteConfig';
 import { getAvailableTimeSlots, formatTime12h } from '@/lib/utils/timeSlots';
@@ -96,6 +98,7 @@ function CustomQuotePage() {
 
   // Notes
   const [notes, setNotes] = useState('');
+  const [flatPack, setFlatPack] = useState({ answer: '', items: [] });
 
   // ── Dynamic time slots (spec #5) ────────────────────────────────────────────
   // Same-day: hide passed slots. Tick every 60s so slots roll forward.
@@ -189,6 +192,8 @@ function CustomQuotePage() {
     e.preventDefault();
     const err = validate();
     if (err) { toast.error(err.message); focusField(err.id); return; }
+    const fpErr = flatPackFormError(flatPack);
+    if (fpErr) { toast.error(fpErr.message); focusField(fpErr.fieldId); return; }
     setSubmitting(true);
     try {
       const cleanStops = stops.filter(s => s.postcode).map(s => ({
@@ -218,6 +223,7 @@ function CustomQuotePage() {
         moversNeeded: 'Not Sure',
         notes: buildNotes() || 'Custom quote request',
         customer,
+        flatPack: flatPackPayload(flatPack),
         packingMaterials: wantsPacking
           ? {
               smallBoxes:      packing.smallBoxes,
@@ -302,6 +308,7 @@ function CustomQuotePage() {
 
               {/* ── 2. Pickup ── */}
               <Section title="Pickup address" n="2">
+                <div className="mb-4"><AddressAutocomplete id="cq-pickup-search" onSelect={p => setPickup(prev => ({ ...prev, ...({ postcode: p.postcode || '', lat: p.lat, lon: p.lon, address: [p.line1 || p.street, p.town].filter(Boolean).join(', ') || p.formattedAddress }) }))} /></div>
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
                   <PostcodeAutocomplete id="cq-pickup" label="Postcode"
                     value={pickup.postcode}
@@ -352,6 +359,7 @@ function CustomQuotePage() {
                         <Trash2 className="w-3 h-3" /> Remove
                       </button>
                     </div>
+                    <div className="mb-3"><AddressAutocomplete id={`cq-stop-${i}-search`} onSelect={p => setStop(i, ({ postcode: p.postcode || '', lat: p.lat, lon: p.lon, address: [p.line1 || p.street, p.town].filter(Boolean).join(', ') || p.formattedAddress }))} /></div>
                     <div className="grid md:grid-cols-2 gap-3 mb-3">
                       <PostcodeAutocomplete label="Postcode" value={s.postcode}
                         onChange={v => setStop(i, { postcode: v.toUpperCase() })}
@@ -376,6 +384,7 @@ function CustomQuotePage() {
 
               {/* ── 4. Delivery ── */}
               <Section title="Final delivery address" n="4">
+                <div className="mb-4"><AddressAutocomplete id="cq-delivery-search" onSelect={p => setDelivery(prev => ({ ...prev, ...({ postcode: p.postcode || '', lat: p.lat, lon: p.lon, address: [p.line1 || p.street, p.town].filter(Boolean).join(', ') || p.formattedAddress }) }))} /></div>
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
                   <PostcodeAutocomplete id="cq-delivery" label="Postcode"
                     value={delivery.postcode}
@@ -545,6 +554,11 @@ function CustomQuotePage() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </Section>
+
+              {/* ── Flat-pack furniture assembly (quoted separately) ── */}
+              <Section title="Flat-pack furniture assembly" n="9b">
+                <FlatPackFields value={flatPack} onChange={setFlatPack} />
               </Section>
 
               {/* ── 10. Notes ── */}

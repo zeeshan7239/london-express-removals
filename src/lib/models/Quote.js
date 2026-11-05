@@ -19,6 +19,7 @@ const quoteSchema = new mongoose.Schema(
       address: { type: String, trim: true },
       lat: { type: Number },
       lon: { type: Number },
+      placeId: { type: String, trim: true, maxlength: 300 }, // Google place confirmed by the server
       floor: { type: String, enum: FLOOR_VALUES },
       access: {
         type: String,
@@ -34,6 +35,7 @@ const quoteSchema = new mongoose.Schema(
       address: { type: String, trim: true },
       lat: { type: Number },
       lon: { type: Number },
+      placeId: { type: String, trim: true, maxlength: 300 }, // Google place confirmed by the server
       floor: { type: String, enum: FLOOR_VALUES },
       access: {
         type: String,
@@ -67,6 +69,7 @@ const quoteSchema = new mongoose.Schema(
       access:   { type: String, enum: ['Lift', 'Stairs', 'Both', '', null], default: undefined },
       lat: { type: Number },
       lon: { type: Number },
+      placeId: { type: String, trim: true, maxlength: 300 }, // Google place confirmed by the server
     }],
 
     // Packing materials — customer-selectable items (all £internally-priced)
@@ -80,6 +83,23 @@ const quoteSchema = new mongoose.Schema(
       total:           { type: Number, default: 0 },
     },
 
+    // Brand-new flat-pack furniture to assemble — priced separately by the admin
+    flatPack: {
+      required: { type: Boolean, default: false },
+      items: [{
+        _id: false,
+        name:               { type: String, trim: true, maxlength: 120 },
+        brand:              { type: String, trim: true, maxlength: 80 },
+        quantity:           { type: Number, min: 1, max: 50, default: 1 },
+        collectionLocation: { type: String, trim: true, maxlength: 250 },
+        assemblyRequired:   { type: Boolean, default: true },
+        notes:              { type: String, trim: true, maxlength: 500 },
+      }],
+      assemblyCharge: { type: Number, min: 0 },          // set by admin only
+      assemblyNote:   { type: String, maxlength: 1000 }, // admin note to customer
+      quotedAt:       { type: Date },
+    },
+
     // Property + service details
     propertyDetails: {
       bedrooms:         { type: String, trim: true },     // e.g. "Studio", "3 Bedrooms"
@@ -88,6 +108,7 @@ const quoteSchema = new mongoose.Schema(
       numLargeItems:    { type: Number, min: 0, default: 0 },
       dismantling:      { type: Boolean, default: false },
       reassembly:       { type: Boolean, default: false },
+      packingService:   { type: Boolean, default: false }, // 'Packing service' extra requested
       parkingAvailable: { type: String, enum: ['yes', 'no', '', null], default: undefined },
     },
 
@@ -102,6 +123,8 @@ const quoteSchema = new mongoose.Schema(
       default: 'new',
     },
     estimatedPrice: { type: Number },
+    // Itemised price shown to the customer: [{ label, amount }]
+    priceBreakdown: [{ _id: false, label: { type: String }, amount: { type: Number } }],
     adminResponse: {
       message: { type: String, maxlength: 2000 },
       respondedAt: { type: Date },

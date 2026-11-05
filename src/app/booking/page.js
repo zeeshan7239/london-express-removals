@@ -16,17 +16,15 @@ import toast from 'react-hot-toast';
 import PostcodeAutocomplete from '@/components/quote/PostcodeAutocomplete';
 import AddressPicker from '@/components/quote/AddressPicker';
 import BookingSummary from '@/components/quote/BookingSummary';
+import PriceBreakdown from '@/components/quote/PriceBreakdown';
+import AddressAutocomplete from '@/components/quote/AddressAutocomplete';
+import FlatPackFields, { flatPackPayload, flatPackFormError } from '@/components/quote/FlatPackFields';
 import { useAuth } from '@/components/common/AuthContext';
 import { isValidEmail, isValidUKPhone } from '@/lib/utils/validation';
 import { siteConfig } from '@/lib/utils/siteConfig';
-import { isInsideM25 } from '@/lib/services/pricingService';
+import useServiceArea from '@/components/quote/useServiceArea';
 import { getAvailableTimeSlots, formatTime12h } from '@/lib/utils/timeSlots';
 import api from '@/lib/utils/api';
-
-// Packing prices (internal only — never shown in form)
-const BOX_PRICE  = 5;
-const WRAP_PRICE = 15;
-const TAPE_PRICE = 10;  // per roll
 
 const movingTypes = [
   { v: 'Studio',      icon: Home,      desc: 'Studio flat' },
@@ -58,17 +56,9 @@ const moversOptions = [
 const bedroomOptions = ['Studio', '1 Bedroom', '2 Bedrooms', '3 Bedrooms', '4 Bedrooms', '5+ Bedrooms'];
 
 const durationOptions = [2, 3, 4, 5, 6, 8];
-const STEPS = 5;
+const STEPS = 6;
 const isGroundFloor = (f) => f === 'Ground Floor';
-const emptyStop = () => ({ postcode: '', address: '', floor: '', access: '', lat: null, lon: null });
-
-/** Internal packing total (never shown until final summary). */
-const calcPackingTotal = (pm) => {
-  const boxes = (pm.smallBoxes || 0) + (pm.mediumBoxes || 0) + (pm.largeBoxes || 0);
-  return boxes * BOX_PRICE
-       + (pm.bubbleWrapRolls || 0) * WRAP_PRICE
-       + (pm.tapeRolls || 0) * TAPE_PRICE;
-};
+const emptyStop = () => ({ postcode: '', address: '', floor: '', access: '', lat: null, lon: null, placeId: '' });
 
 export default function BookingPage() {
   const { user } = useAuth();
@@ -86,10 +76,14 @@ export default function BookingPage() {
   const [stops, setStops] = useState([]);
 
   // Packing
-  const [wantsPacking, setWantsPacking] = useState(false);
+  const [packingService, setPackingService] = useState(false); // 'Packing service' extra
+  const [wantsPacking, setWantsPacking] = useState(false);     // packing materials
   const [packing, setPacking] = useState({
     smallBoxes: 0, mediumBoxes: 0, largeBoxes: 0, bubbleWrapRolls: 0, tapeRolls: 0,
   });
+
+  // Brand-new flat-pack furniture (assembly quoted separately by our team)
+  const [flatPack, setFlatPack] = useState({ answer: '', items: [] });
 
   // Additional details
   const [bedrooms,     setBedrooms]     = useState('');
@@ -104,11 +98,12 @@ export default function BookingPage() {
 
 
   const prevPriceRef = useRef(null);
+  const [priceNonce, setPriceNonce] = useState(0); // bump to force a fresh server price
 
   const [data, setData] = useState({
     movingType: '',
-    pickup:   { postcode: '', address: '', floor: '', access: '', lat: null, lon: null },
-    delivery: { postcode: '', address: '', floor: '', access: '', lat: null, lon: null },
+    pickup:   { postcode: '', address: '', floor: '', access: '', lat: null, lon: null, placeId: '' },
+    delivery: { postcode: '', address: '', floor: '', access: '', lat: null, lon: null, placeId: '' },
     movingDate: '', preferredTime: '', moversNeeded: '', notes: '',
     customer: { name: '', email: '', phone: '' },
   });
@@ -242,11 +237,17 @@ export default function BookingPage() {
       const [a, b] = path.split('.');
       if (!b) return { ...prev, [a]: value };
       const next = { ...prev, [a]: { ...prev[a], [b]: value } };
+      if (b === 'postcode') next[a].placeId = ''; // typed by hand: Google place no longer applies
       if (b === 'floor' && isGroundFloor(value)) next[a].access = '';
       return next;
     });
   };
 
+  // What we keep when a customer picks a Google suggestion
+  const googleFill = (p) => ({
+    postcode: p.postcode, placeId: p.placeId, lat: p.lat, lon: p.lon,
+    address: [p.line1 || p.street, p.town].filter(Boolean).join(', ') || p.formattedAddress,
+  });
   const mergeSide = (side, patch) => setData((prev) => ({ ...prev, [side]: { ...prev[side], ...patch } }));
 
   // Stop management (single "stops" array between pickup and delivery)
@@ -254,35 +255,27 @@ export default function BookingPage() {
   const removeStop = (i) => setStops(s => s.filter((_, idx) => idx !== i));
   const setStop = (i, patch) => setStops(s => s.map((st, idx) => idx === i ? { ...st, ...patch } : st));
 
-  // Packing total (only meaningful when wantsPacking)
-  const packingTotal = wantsPacking ? calcPackingTotal(packing) : 0;
+  // ── Postcode validation + London / M25 service-area check ──────────────────
+  // Every postcode (pickup, stops, delivery) is checked by OUR server (it looks the
+  // postcode up and tests the real location). It re-runs whenever a postcode
+  // changes. The server repeats the same check when the booking is submitted, so
+  // this is for instant feedback only.
+  const ent = (s) => ({ postcode: s.postcode, placeId: s.placeId });
+  const area = useServiceArea([ent(data.pickup), ...stops.map(ent), ent(data.delivery)]);
+  const pickupArea   = area.statusFor(ent(data.pickup));
+  const deliveryArea = area.statusFor(ent(data.delivery));
+  const stopAreas    = stops.map(s => area.statusFor(ent(s)));
+  const allAreas     = [pickupArea, deliveryArea, ...stopAreas.filter(Boolean)];
 
-  // ── M25 detection (fast, synchronous — no API call needed) ────────────────
-  // Runs on every postcode change. This is the FIX for the "please wait" bug:
-  // if either postcode is outside M25, we short-circuit BEFORE calling the API.
-  const pickupHasLocation   = !!(data.pickup.postcode);
-  const deliveryHasLocation = !!(data.delivery.postcode);
+  const anyOutside     = allAreas.some(a => a?.status === 'outside');
+  const anyUnavailable = allAreas.some(a => a?.status === 'unavailable');
+  const anyChecking    = allAreas.some(a => a?.status === 'checking');
+  const postcodesOk =
+       pickupArea?.status === 'inside'
+    && deliveryArea?.status === 'inside'
+    && stopAreas.every((a, i) => !stops[i].postcode || a?.status === 'inside');
 
-  // Check each location. isInsideM25 handles both postcode-only and postcode+latlng.
-  const pickupInside   = pickupHasLocation
-    ? isInsideM25(data.pickup.postcode, data.pickup.lat != null ? { lat: data.pickup.lat, lon: data.pickup.lon } : null)
-    : null;
-  const deliveryInside = deliveryHasLocation
-    ? isInsideM25(data.delivery.postcode, data.delivery.lat != null ? { lat: data.delivery.lat, lon: data.delivery.lon } : null)
-    : null;
-
-  // Also check any intermediate stops
-  const anyStopOutside = stops.some(s => {
-    if (!s.postcode) return false;
-    return !isInsideM25(s.postcode, s.lat != null ? { lat: s.lat, lon: s.lon } : null);
-  });
-
-  // Show the outside-M25 banner as soon as we know ANY postcode is out of area.
-  // We don't wait for both — one is enough to disqualify from instant booking.
-  const anyOutside =
-       (pickupInside   === false)
-    || (deliveryInside === false)
-    || anyStopOutside;
+  const packingCounts = wantsPacking ? packing : { smallBoxes: 0, mediumBoxes: 0, largeBoxes: 0, bubbleWrapRolls: 0, tapeRolls: 0 };
 
   // ── Live pricing ──
   // Guarded so we NEVER call the API when we already know it's outside M25.
@@ -291,8 +284,8 @@ export default function BookingPage() {
     const ready = data.movingType && data.pickup.postcode && data.delivery.postcode
       && data.pickup.floor && data.delivery.floor && data.moversNeeded;
 
-    // If any location is outside M25, skip the API entirely
-    if (!ready || anyOutside) {
+    // Only price once both postcodes are valid AND inside London / M25
+    if (!ready || !postcodesOk) {
       setPricing(null);
       setPricingLoading(false);
       return;
@@ -304,9 +297,9 @@ export default function BookingPage() {
       try {
         const { data: result } = await api.post('/pricing/calculate', {
           pickupPostcode:   data.pickup.postcode,
+          pickupPlaceId:    data.pickup.placeId || undefined,
           deliveryPostcode: data.delivery.postcode,
-          pickupLatLng:    data.pickup.lat   != null ? { lat: data.pickup.lat,   lon: data.pickup.lon   } : undefined,
-          deliveryLatLng:  data.delivery.lat != null ? { lat: data.delivery.lat, lon: data.delivery.lon } : undefined,
+          deliveryPlaceId:  data.delivery.placeId || undefined,
           pickupFloor:     data.pickup.floor,
           pickupHasLift:   data.pickup.access === 'Lift' || data.pickup.access === 'Both',
           deliveryFloor:   data.delivery.floor,
@@ -314,6 +307,9 @@ export default function BookingPage() {
           propertyType:    data.movingType,
           moversNeeded:    data.moversNeeded,
           hours,
+          services:        { packingService, dismantling, reassembly },
+          wantsPacking,
+          packing:         packingCounts,
         });
         if (!cancelled) setPricing(result);
       } catch { if (!cancelled) setPricing({ ok: false, reason: 'error' }); }
@@ -322,9 +318,10 @@ export default function BookingPage() {
     return () => { cancelled = true; clearTimeout(t); };
   }, [
     data.movingType, data.moversNeeded, hours,
-    data.pickup.postcode,   data.pickup.lat,   data.pickup.floor,   data.pickup.access,
-    data.delivery.postcode, data.delivery.lat, data.delivery.floor, data.delivery.access,
-    anyOutside,
+    data.pickup.postcode,   data.pickup.placeId, data.pickup.lat,   data.pickup.floor,   data.pickup.access,
+    data.delivery.postcode, data.delivery.placeId, data.delivery.lat, data.delivery.floor, data.delivery.access,
+    postcodesOk, packingService, dismantling, reassembly, wantsPacking, priceNonce,
+    packing.smallBoxes, packing.mediumBoxes, packing.largeBoxes, packing.bubbleWrapRolls, packing.tapeRolls,
   ]);
 
   useEffect(() => {
@@ -335,7 +332,7 @@ export default function BookingPage() {
     }
     const team = pricing.teams.find(t => t.teamKey === (selectedTeamKey || 'twoMen')) || pricing.teams[0];
     if (!team) return;
-    const total = team.total + packingTotal;
+    const total = team.total;
     if (prevPriceRef.current == null) {
       toast.success('Price calculated', { duration: 1800, id: 'price-toast' });
       prevPriceRef.current = total;
@@ -343,18 +340,41 @@ export default function BookingPage() {
       toast.success(`Price updated: £${total}`, { duration: 1800, id: 'price-toast' });
       prevPriceRef.current = total;
     }
-  }, [pricing, selectedTeamKey, packingTotal]);
+  }, [pricing, selectedTeamKey]);
 
   const selectedTeam  = pricing?.teams?.find(t => t.teamKey === selectedTeamKey);
-  const selectedTotal = selectedTeam ? selectedTeam.total + packingTotal : null;
+  const selectedTotal = selectedTeam ? selectedTeam.total : null;
+
+  // Why the postcode fields are blocking progress (null when both are fine)
+  const postcodeProblem = () => {
+    const check = (label, a, id) => {
+      const st = a?.status;
+      if (!st) return { message: `Please enter your ${label} postcode.`, fieldId: id };
+      if (st === 'invalid' || st === 'not_found') return { message: `${label[0].toUpperCase() + label.slice(1)} postcode: ${a.message}`, fieldId: id };
+      if (st === 'checking') return { message: `Checking your ${label} postcode — one moment.`, fieldId: id };
+      if (st === 'unavailable') return { message: a.message, fieldId: id };
+      return null;
+    };
+    const outside = [pickupArea, deliveryArea, ...stopAreas].some(a => a?.status === 'outside');
+    if (outside) return { message: 'Your collection or delivery location is outside our London & M25 service area. Please request a custom quote.', block: true };
+    const pu = check('pickup', pickupArea, 'pickup-postcode');
+    if (pu) return pu;
+    const de = check('delivery', deliveryArea, 'delivery-postcode');
+    if (de) return de;
+    for (let i = 0; i < stops.length; i++) {
+      if (!stops[i].postcode) continue;
+      const st = stopAreas[i]?.status;
+      if (st !== 'inside') return { message: `Stop ${i + 1}: ${stopAreas[i]?.message || 'please check this postcode.'}` };
+    }
+    return null;
+  };
 
   const validateStep = () => {
     switch (step) {
       case 1: return data.movingType ? null : { message: "Please choose what you're moving." };
       case 2: {
-        if (!data.pickup.postcode)   return { message: 'Please enter your pickup postcode.',   fieldId: 'pickup-postcode' };
-        if (!data.delivery.postcode) return { message: 'Please enter your delivery postcode.', fieldId: 'delivery-postcode' };
-        if (anyOutside)              return { message: 'Please request a custom quote for moves outside the M25.', block: true };
+        const pc = postcodeProblem();
+        if (pc) return pc;
         if (!data.pickup.floor)      return { message: 'Please select the pickup floor.',      fieldId: 'pickup-floor' };
         if (!isGroundFloor(data.pickup.floor) && !data.pickup.access)
           return { message: 'Please select pickup lift or stairs.', fieldId: 'pickup-access' };
@@ -365,13 +385,14 @@ export default function BookingPage() {
         if (sameDayClosed)           return { message: 'Online booking for today is no longer available. Please select another date or contact us directly.', fieldId: 'moving-date' };
         return null;
       }
-      case 3: {
+      case 3: return flatPackFormError(flatPack); // packing / dismantling / reassembly are optional
+      case 4: {
         if (!data.moversNeeded) return { message: 'Please choose how many movers you need.' };
         if (!pricingLoading && !selectedTeam) return { message: 'Please wait while we calculate your price.' };
         return null;
       }
-      case 4: return null; // property/packing details all optional
-       case 5: {
+      case 5: return null; // property details are optional
+      case 6: {
         if (!data.customer.name?.trim())          return { message: 'Please enter your full name.',          fieldId: 'customer-name' };
         if (!isValidEmail(data.customer.email))   return { message: 'Please enter a valid email address.',   fieldId: 'customer-email' };
         if (!isValidUKPhone(data.customer.phone)) return { message: 'Please enter a valid UK phone number.', fieldId: 'customer-phone' };
@@ -393,9 +414,9 @@ export default function BookingPage() {
   };
 
   const handleContinue = () => {
-    // Step 2 hard block if outside M25 — no continue at all
+    // Step 2 hard block: outside London / M25 (or not yet verified) — no continue at all
     if (step === 2 && anyOutside) {
-      toast.error('This move is outside the M25. Please use the custom quote form.');
+      toast.error('This move is outside our London & M25 service area. Please request a custom quote.');
       return;
     }
     const err = validateStep();
@@ -409,6 +430,7 @@ export default function BookingPage() {
       const cleanSide = (s) => ({
         postcode: s.postcode, address: s.address || undefined,
         floor: s.floor, lat: s.lat || undefined, lon: s.lon || undefined,
+        placeId: s.placeId || undefined,
         ...(s.access ? { access: s.access } : {}),
       });
       const cleanStops = stops.filter(s => s.postcode).map(cleanSide);
@@ -421,19 +443,22 @@ export default function BookingPage() {
         movingDate:    data.movingDate,
         preferredTime: data.preferredTime || undefined,
         moversNeeded:  data.moversNeeded,
+        teamKey:       selectedTeamKey || undefined,
         durationHours: hours,
         distanceMiles: pricing?.coverage?.distanceMiles,
         travelMinutes: pricing?.coverage?.travelMinutes,
         isShortTrip:   !!selectedTeam?.isShortTrip,
         estimatedPrice: selectedTotal,
+        flatPack: flatPackPayload(flatPack),
         packingMaterials: wantsPacking
-          ? { ...packing, total: packingTotal, requested: true }
+          ? { ...packing, requested: true }
           : { smallBoxes: 0, mediumBoxes: 0, largeBoxes: 0, bubbleWrapRolls: 0, tapeRolls: 0, total: 0, requested: false },
         propertyDetails: {
           bedrooms:       bedrooms || undefined,
           numBeds,
           numSofas,
           numLargeItems,
+          packingService,
           dismantling,
           reassembly,
           parkingAvailable: parking || undefined,
@@ -445,7 +470,18 @@ export default function BookingPage() {
       setDone(true);
       toast.success("Booking submitted! We'll confirm shortly.");
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Could not submit booking');
+      const r = err.response?.data;
+      if (r?.code === 'OUTSIDE_SERVICE_AREA') {
+        toast.error('This move is outside our London & M25 service area. Please request a custom quote.');
+        setStep(2);
+      } else if (r?.code === 'PRICE_MISMATCH') {
+        toast.error(r.message || 'The price has changed. Please review it and confirm again.');
+        setPricing(null);
+        setPriceNonce(n => n + 1);   // fetch the up-to-date server price
+        setStep(4);
+      } else {
+        toast.error(r?.message || 'Could not submit booking');
+      }
     } finally { setSubmitting(false); }
   };
 
@@ -481,6 +517,12 @@ export default function BookingPage() {
             <div className="text-xs uppercase tracking-widest text-ink-500 font-semibold mb-2">Estimated total</div>
             <div className="font-display font-extrabold text-4xl text-ember-600">£{selectedTotal}</div>
             <div className="text-sm text-ink-500 mt-1">{selectedTeam?.label} · {hours}h booking</div>
+            {flatPack.answer === 'yes' && flatPack.items.length > 0 && (
+              <div className="mt-3 text-xs text-left rounded-xl bg-amber-50 border border-amber-200 p-3 text-ink-700">
+                <strong>Flat-pack assembly – custom quote required.</strong> Our team will review your furniture and send a
+                separate assembly quotation. It is added to this removal price.
+              </div>
+            )}
             {newBookingId && (
               <div className="mt-4 pt-4 border-t border-ink-100">
                 <div className="text-[10px] uppercase tracking-wider text-ink-500 font-semibold">Reference</div>
@@ -519,7 +561,7 @@ export default function BookingPage() {
     );
   }
 
-  const stepLabels = ['Move type', 'Where & when', 'Team & duration', 'Property & packing', 'Your details'];
+  const stepLabels = ['Move type', 'Where & when', 'Extra services', 'Team & duration', 'Property details', 'Your details'];
 
   return (
     <>
@@ -588,8 +630,9 @@ export default function BookingPage() {
                         {/* PICKUP */}
                         <LocationBlock
                           label="Pickup address" dotColor="bg-ember-500" side="pickup"
-                          sideData={data.pickup}
+                          sideData={data.pickup} areaStatus={pickupArea}
                           setSide={(k, v) => set(`pickup.${k}`, v)}
+                          onAddressSelect={p => mergeSide('pickup', googleFill(p))}
                           onPostcodeSelect={d => mergeSide('pickup', d
                             ? { postcode: d.postcode, lat: d.latitude, lon: d.longitude }
                             : { lat: null, lon: null })} />
@@ -607,9 +650,12 @@ export default function BookingPage() {
                                 <Trash2 className="w-3 h-3" /> Remove
                               </button>
                             </div>
+                            <div className="mb-4">
+                              <AddressAutocomplete id={`stop-${i}-search`} onSelect={p => setStop(i, googleFill(p))} />
+                            </div>
                             <div className="grid md:grid-cols-2 gap-4">
-                              <PostcodeAutocomplete label="Postcode" value={s.postcode}
-                                onChange={v => setStop(i, { postcode: v.toUpperCase() })}
+                              <PostcodeAutocomplete label="Postcode" value={s.postcode} areaStatus={stopAreas[i]}
+                                onChange={v => setStop(i, { postcode: v.toUpperCase(), placeId: '' })}
                                 onSelect={d => setStop(i, d
                                   ? { postcode: d.postcode, lat: d.latitude, lon: d.longitude }
                                   : { lat: null, lon: null })} />
@@ -632,13 +678,65 @@ export default function BookingPage() {
                         <div className="border-t border-ink-100 pt-6">
                           <LocationBlock
                             label="Final delivery address" dotColor="bg-ink-900" side="delivery"
-                            sideData={data.delivery}
+                            sideData={data.delivery} areaStatus={deliveryArea}
                             setSide={(k, v) => set(`delivery.${k}`, v)}
+                            onAddressSelect={p => mergeSide('delivery', googleFill(p))}
                             onPostcodeSelect={d => mergeSide('delivery', d
                               ? { postcode: d.postcode, lat: d.latitude, lon: d.longitude }
                               : { lat: null, lon: null })} />
                         </div>
 
+                        {/* ── OUTSIDE LONDON / M25 — blocks the standard booking ── */}
+                        {anyOutside && (
+                          <motion.div role="alert" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                            className="rounded-2xl border-2 border-red-400 bg-red-50 p-5">
+                            <div className="flex items-start gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center shrink-0">
+                                <MapPin className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-display font-bold text-base text-ink-900 mb-1">
+                                  Outside our standard London &amp; M25 service area
+                                </h3>
+                                <p className="text-sm text-ink-700 leading-relaxed mb-4">
+                                  Your collection or delivery location is outside our standard London &amp; M25 service area.
+                                  We may still be able to help! Please contact us at{' '}
+                                  <a href={`mailto:${siteConfig.email}`} className="font-semibold text-ember-700 underline break-all">{siteConfig.email}</a>{' '}
+                                  to receive a personalised quotation.
+                                </p>
+                                <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+                                  <Link href={buildCustomQuoteUrl()}
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ember-500 text-white text-sm font-bold hover:bg-ember-600 transition">
+                                    <FileText className="w-4 h-4" /> Request a Custom Quote
+                                  </Link>
+                                  <a href={`mailto:${siteConfig.email}`}
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ink-900 text-white text-sm font-bold hover:bg-ink-800 transition">
+                                    <Mail className="w-4 h-4" /> Email Us
+                                  </a>
+                                  <a href={siteConfig.whatsapp} target="_blank" rel="noreferrer"
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition">
+                                    <MessageCircle className="w-4 h-4" /> WhatsApp
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+
+                        {/* Lookup unavailable — we cannot confirm the area, so we do not let the customer continue */}
+                        {!anyOutside && anyUnavailable && (
+                          <div role="alert" className="rounded-2xl border-2 border-amber-400 bg-amber-50 p-4 flex items-start gap-3">
+                            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                            <div className="text-sm text-ink-700">
+                              <strong className="text-ink-900">We couldn&apos;t check your postcode just now.</strong>{' '}
+                              <button type="button" onClick={area.retryCheck} className="font-semibold text-ember-700 underline">Try again</button>
+                              {' '}or <Link href={buildCustomQuoteUrl()} className="font-semibold text-ember-700 underline">request a custom quote</Link>.
+                            </div>
+                          </div>
+                        )}
+
+                        {!anyOutside && (
+                          <>
                         {/* DATE + TIME */}
                         <div className="border-t border-ink-100 pt-6 grid sm:grid-cols-2 gap-4">
                           <div>
@@ -683,50 +781,89 @@ export default function BookingPage() {
                             </div>
                           </div>
                         )}
-
-                        {/* ── OUTSIDE M25 BANNER — replaces everything, blocks progression ── */}
-                        {anyOutside && (
-                          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                            className="rounded-2xl border-2 border-amber-400 bg-amber-50 p-5">
-                            <div className="flex items-start gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
-                                <MapPin className="w-5 h-5 text-white" />
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-display font-bold text-base text-ink-900 mb-1">
-                                  Outside our M25 instant booking area
-                                </h3>
-                                <p className="text-sm text-ink-700 leading-relaxed mb-4">
-                                  This move falls outside our M25 instant booking area. Please request a custom quote
-                                  and our team will provide a tailored price within 30 minutes.
-                                </p>
-                                <div className="flex flex-col sm:flex-row gap-2">
-                                  <Link href={buildCustomQuoteUrl()}
-                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ember-500 text-white text-sm font-bold hover:bg-ember-600 transition">
-                                    <FileText className="w-4 h-4" /> Request Custom Quote
-                                  </Link>
-                                  <a href={siteConfig.whatsapp} target="_blank" rel="noreferrer"
-                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition">
-                                    <MessageCircle className="w-4 h-4" /> WhatsApp Us
-                                  </a>
-                                  <a href={`tel:${siteConfig.phoneRaw}`}
-                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ink-900 text-white text-sm font-bold hover:bg-ink-800 transition">
-                                    <Phone className="w-4 h-4" /> Call Us
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
+                          </>
                         )}
                       </div>
                     </>
                   )}
 
-                  {/* ── Step 3: Team & duration ── */}
+                  {/* ── Step 3: Extra services — asked BEFORE team size and duration ── */}
                   {step === 3 && (
                     <>
+                      <h2 className="font-display text-2xl md:text-3xl font-bold mb-2">Any extra services?</h2>
+                      <p className="text-ink-500 mb-6 text-sm">
+                        Tell us now so everything is included in your price. All optional — skip this step if you don&apos;t need any.
+                      </p>
+                      <div className="space-y-6">
+                        {/* Packing — service + materials (materials gated behind checkbox) */}
+                        <div>
+                          <label className="text-xs font-semibold text-ink-600 mb-2 flex items-center gap-2">
+                            <PackagePlus className="w-3.5 h-3.5 text-ember-500" /> Packing
+                          </label>
+                          <div className="mb-3">
+                            <ToggleCheckbox checked={packingService} onChange={setPackingService}
+                              label="Packing service"
+                              desc="Our team packs your belongings for you" />
+                          </div>
+                          <ToggleCheckbox checked={wantsPacking} onChange={setWantsPacking}
+                            label="I require packing materials"
+                            desc="Boxes and bubble wrap delivered on moving day" />
+
+                          <AnimatePresence initial={false}>
+                            {wantsPacking && (
+                              <motion.div initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden">
+                                <div className="pt-4 space-y-3">
+                                  <PackingRow label="Small Boxes" sub="Books, small items"
+                                    value={packing.smallBoxes}
+                                    onChange={v => setPacking(p => ({ ...p, smallBoxes: Math.max(0, v) }))} />
+                                  <PackingRow label="Medium Boxes" sub="Clothes, kitchenware"
+                                    value={packing.mediumBoxes}
+                                    onChange={v => setPacking(p => ({ ...p, mediumBoxes: Math.max(0, v) }))} />
+                                  <PackingRow label="Large Boxes" sub="Bedding, bulky items"
+                                    value={packing.largeBoxes}
+                                    onChange={v => setPacking(p => ({ ...p, largeBoxes: Math.max(0, v) }))} />
+                                  <PackingRow label="Bubble Wrap" sub="Number of rolls"
+                                    value={packing.bubbleWrapRolls}
+                                    onChange={v => setPacking(p => ({ ...p, bubbleWrapRolls: Math.max(0, v) }))} max={20} />
+                                  <PackingRow label="Packing Tape" sub="Number of rolls"
+                                    value={packing.tapeRolls}
+                                    onChange={v => setPacking(p => ({ ...p, tapeRolls: Math.max(0, v) }))} max={20} />
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+
+                        {/* Furniture services */}
+                        <div>
+                          <label className="text-xs font-semibold text-ink-600 mb-2 flex items-center gap-2">
+                            <Wrench className="w-3.5 h-3.5 text-ember-500" /> Furniture services
+                          </label>
+                          <div className="grid sm:grid-cols-2 gap-3">
+                            <ToggleCheckbox checked={dismantling} onChange={setDismantling}
+                              label="Dismantling required" desc="At pickup" />
+                            <ToggleCheckbox checked={reassembly} onChange={setReassembly}
+                              label="Reassembly required" desc="At delivery" />
+                          </div>
+                        </div>
+
+
+                        {/* Brand-new flat-pack furniture — custom assembly quote, never changes the removal price */}
+                        <div className="border-t border-ink-100 pt-6">
+                          <FlatPackFields value={flatPack} onChange={setFlatPack} />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* ── Step 4: Team & duration ── */}
+                  {step === 4 && (
+                    <>
                       <h2 className="font-display text-2xl md:text-3xl font-bold mb-2">Team &amp; duration</h2>
-                      <p className="text-ink-500 mb-6 text-sm">Pick your team size and how long you need them.</p>
+                      <p className="text-ink-500 mb-6 text-sm">Pick your team size and how long you need them. Minimum booking is 2 hours.</p>
                       <div className="mb-6">
                         <label className="text-xs font-semibold text-ink-600 mb-2 block">Movers needed</label>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -767,7 +904,7 @@ export default function BookingPage() {
                       {pricing?.ok && (
                         <div className="grid sm:grid-cols-2 gap-3 mt-4">
                           {pricing.teams.map(t => (
-                            <TeamCard key={t.teamKey} team={t} packingTotal={packingTotal}
+                            <TeamCard key={t.teamKey} team={t}
                               active={selectedTeamKey === t.teamKey}
                               onSelect={() => {
                                 setSelectedTeamKey(t.teamKey);
@@ -777,11 +914,12 @@ export default function BookingPage() {
                           ))}
                         </div>
                       )}
+                      {pricing?.ok && selectedTeam && <PriceBreakdown team={selectedTeam} className="mt-5" />}
                     </>
                   )}
 
-                  {/* ── Step 4: Property & Packing — bedrooms, furniture qty, dismantling, packing, parking ── */}
-                  {step === 4 && (
+                  {/* ── Step 5: Property details — bedrooms, furniture inventory, parking ── */}
+                  {step === 5 && (
                     <>
                       <h2 className="font-display text-2xl md:text-3xl font-bold mb-2">A few more details</h2>
                       <p className="text-ink-500 mb-6 text-sm">Helps us send the right team and van. All optional except parking.</p>
@@ -812,56 +950,6 @@ export default function BookingPage() {
                             <QtyCard label="Sofas" icon={Sofa} value={numSofas} onChange={setNumSofas} />
                             <QtyCard label="Large items" icon={Package} value={numLargeItems} onChange={setNumLargeItems} sub="Wardrobes, appliances" />
                           </div>
-                        </div>
-
-                        {/* Furniture services */}
-                        <div>
-                          <label className="text-xs font-semibold text-ink-600 mb-2 flex items-center gap-2">
-                            <Wrench className="w-3.5 h-3.5 text-ember-500" /> Furniture services
-                          </label>
-                          <div className="grid sm:grid-cols-2 gap-3">
-                            <ToggleCheckbox checked={dismantling} onChange={setDismantling}
-                              label="Dismantling required" desc="At pickup" />
-                            <ToggleCheckbox checked={reassembly} onChange={setReassembly}
-                              label="Reassembly required" desc="At delivery" />
-                          </div>
-                        </div>
-
-                        {/* Packing services — gated behind checkbox, NO prices shown */}
-                        <div>
-                          <label className="text-xs font-semibold text-ink-600 mb-2 flex items-center gap-2">
-                            <PackagePlus className="w-3.5 h-3.5 text-ember-500" /> Packing services
-                          </label>
-                          <ToggleCheckbox checked={wantsPacking} onChange={setWantsPacking}
-                            label="I require packing materials"
-                            desc="Boxes and bubble wrap delivered on moving day" />
-
-                          <AnimatePresence initial={false}>
-                            {wantsPacking && (
-                              <motion.div initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden">
-                                <div className="pt-4 space-y-3">
-                                  <PackingRow label="Small Boxes" sub="Books, small items"
-                                    value={packing.smallBoxes}
-                                    onChange={v => setPacking(p => ({ ...p, smallBoxes: Math.max(0, v) }))} />
-                                  <PackingRow label="Medium Boxes" sub="Clothes, kitchenware"
-                                    value={packing.mediumBoxes}
-                                    onChange={v => setPacking(p => ({ ...p, mediumBoxes: Math.max(0, v) }))} />
-                                  <PackingRow label="Large Boxes" sub="Bedding, bulky items"
-                                    value={packing.largeBoxes}
-                                    onChange={v => setPacking(p => ({ ...p, largeBoxes: Math.max(0, v) }))} />
-                                  <PackingRow label="Bubble Wrap" sub="Number of rolls"
-                                    value={packing.bubbleWrapRolls}
-                                    onChange={v => setPacking(p => ({ ...p, bubbleWrapRolls: Math.max(0, v) }))} max={20} />
-                                  <PackingRow label="Packing Tape" sub="Number of rolls"
-                                    value={packing.tapeRolls}
-                                    onChange={v => setPacking(p => ({ ...p, tapeRolls: Math.max(0, v) }))} max={20} />
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
                         </div>
 
                         {/* Parking — required Y/N */}
@@ -898,8 +986,8 @@ export default function BookingPage() {
                     </>
                   )}
 
-                  {/* ── Step 5: Contact details ── */}
-                  {step === 5 && (
+                  {/* ── Step 6: Contact details ── */}
+                  {step === 6 && (
                     <>
                       <h2 className="font-display text-2xl md:text-3xl font-bold mb-2">Your details</h2>
                       <p className="text-ink-500 mb-6 text-sm">Last step — we'll confirm your booking shortly after.</p>
@@ -1040,7 +1128,7 @@ export default function BookingPage() {
                 </button>
                 {step < STEPS ? (
                   <button onClick={handleContinue}
-                    disabled={step === 2 && (anyOutside || sameDayClosed)}
+                    disabled={step === 2 && (anyOutside || anyChecking || anyUnavailable || sameDayClosed)}
                     className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
                     Continue <ChevronRight className="w-4 h-4" />
                   </button>
@@ -1064,8 +1152,8 @@ export default function BookingPage() {
           {/* Sidebar */}
           <aside className="hidden lg:block">
             <div className="sticky top-24">
-              <BookingSummary data={data} selectedTeam={selectedTeam} hours={hours}
-                packingTotal={packingTotal} stops={stops} />
+              <BookingSummary data={data} selectedTeam={selectedTeam} hours={hours} stops={stops}
+                services={{ packingService, dismantling, reassembly, wantsPacking, flatPack: flatPack.answer === 'yes' && flatPack.items.length > 0 }} />
             </div>
           </aside>
         </div>
@@ -1089,15 +1177,18 @@ export default function BookingPage() {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function LocationBlock({ label, dotColor, side, sideData, setSide, onPostcodeSelect }) {
+function LocationBlock({ label, dotColor, side, sideData, setSide, onPostcodeSelect, onAddressSelect, areaStatus }) {
   return (
     <div>
       <div className="text-sm font-bold text-ink-900 mb-3 flex items-center gap-2">
         <span className={`w-2 h-2 rounded-full ${dotColor}`} /> {label}
       </div>
+      <div className="mb-4">
+        <AddressAutocomplete id={`${side}-search`} onSelect={onAddressSelect} />
+      </div>
       <div className="grid md:grid-cols-2 gap-4">
         <PostcodeAutocomplete id={`${side}-postcode`} label="Postcode"
-          value={sideData.postcode}
+          value={sideData.postcode} areaStatus={areaStatus}
           onChange={v => setSide('postcode', v)}
           onSelect={onPostcodeSelect} />
         <AddressPicker postcode={sideData.postcode} value={sideData.address}
@@ -1154,8 +1245,8 @@ function FloorAndAccess({ side, data, set }) {
   );
 }
 
-function TeamCard({ team, active, onSelect, packingTotal }) {
-  const displayTotal = team.total + (packingTotal || 0);
+function TeamCard({ team, active, onSelect }) {
+  const displayTotal = team.total;
   return (
     <button onClick={onSelect}
       className={`relative p-5 rounded-2xl border-2 text-left transition-all ${active ? 'border-ember-500 bg-ember-50 shadow-glow-ember' : 'border-ink-100 hover:border-ink-300 hover:-translate-y-0.5 bg-white'}`}>
@@ -1177,7 +1268,7 @@ function TeamCard({ team, active, onSelect, packingTotal }) {
         <span className="text-xl font-bold text-ink-500">£</span>
         <span className="font-display font-extrabold text-3xl text-ink-900">{displayTotal}</span>
       </div>
-      <div className="text-xs text-ink-500">{team.requestedHours}h included · +£{team.extraHourRate}/hr after</div>
+      <div className="text-xs text-ink-500">{team.requestedHours}h booking · +£{team.extraHourRate}/hr after {team.includedHours}h</div>
     </button>
   );
 }

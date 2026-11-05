@@ -8,6 +8,9 @@ import { UK_POSTCODE_REGEX } from '@/lib/utils/validation';
 export default function PostcodeAutocomplete({
   value = '', onChange, onSelect,
   placeholder = 'e.g. SW1A 1AA', label, icon: Icon = MapPin, id,
+  // Result of the server-side service-area check (see useServiceArea):
+  // { status: 'inside' | 'outside' | 'invalid' | 'not_found' | 'unavailable' | 'checking', message }
+  areaStatus = null,
 }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -15,6 +18,7 @@ export default function PostcodeAutocomplete({
   const [validated, setValidated] = useState(null);
   const [error, setError] = useState(null);
   const [activeIdx, setActiveIdx] = useState(-1);
+  const [touched, setTouched] = useState(false);
 
   const debounceRef = useRef(null);
   const wrapRef = useRef(null);
@@ -106,6 +110,18 @@ export default function PostcodeAutocomplete({
     inputRef.current?.focus();
   };
 
+  // ── What to show under the field ───────────────────────────────────────────
+  const st = areaStatus?.status || null;
+  const compact = value.replace(/\s+/g, '');
+  // "invalid" is only shown once the customer has finished typing (left the field,
+  // or typed a full-length postcode) so we never nag mid-typing.
+  const showAreaProblem = st && ['outside', 'not_found', 'unavailable'].includes(st)
+    || (st === 'invalid' && (touched || compact.length >= 6));
+  const areaOk = st === 'inside';
+  const areaChecking = st === 'checking';
+  const errorText = showAreaProblem ? areaStatus.message : error;
+  const okText = areaOk ? (validated?.adminDistrict || validated?.region || areaStatus?.adminDistrict || 'In our service area') : null;
+
   return (
     <div ref={wrapRef} className="relative">
       {label && (
@@ -122,6 +138,7 @@ export default function PostcodeAutocomplete({
           onChange={(e) => { onChange(e.target.value.toUpperCase()); setValidated(null); setError(null); }}
           onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
           onBlur={() => {
+            setTouched(true);
             setTimeout(() => {
               if (!value || validated) return;
               if (!UK_POSTCODE_REGEX.test(value.trim())) {
@@ -133,15 +150,15 @@ export default function PostcodeAutocomplete({
           placeholder={placeholder}
           autoComplete="off"
           spellCheck={false}
-          aria-invalid={!!error}
+          aria-invalid={!!errorText}
           className={`input-field uppercase pr-12 ${
-            validated ? 'border-emerald-500 focus:border-emerald-500 focus:ring-emerald-100' : ''
-          } ${error ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : ''}`}
+            (st ? areaOk : validated) ? 'border-emerald-500 focus:border-emerald-500 focus:ring-emerald-100' : ''
+          } ${errorText ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : ''}`}
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-          {loading && <Loader2 className="w-4 h-4 animate-spin text-ink-400" />}
-          {!loading && validated && <Check className="w-4 h-4 text-emerald-500" strokeWidth={3} />}
-          {!loading && !validated && value && (
+          {(loading || areaChecking) && <Loader2 className="w-4 h-4 animate-spin text-ink-400" />}
+          {!loading && !areaChecking && (st ? areaOk : validated) && <Check className="w-4 h-4 text-emerald-500" strokeWidth={3} />}
+          {!loading && !areaChecking && !(st ? areaOk : validated) && value && (
             <button type="button" onClick={clear} className="text-ink-400 hover:text-ink-700" aria-label="Clear">
               <X className="w-4 h-4" />
             </button>
@@ -150,15 +167,15 @@ export default function PostcodeAutocomplete({
         </div>
       </div>
 
-      {validated && (
+      {(st ? areaOk : validated) && !errorText && (
         <div className="mt-1.5 text-xs text-emerald-700 flex items-center gap-1.5">
-          <Check className="w-3 h-3" strokeWidth={3} />
-          {validated.adminDistrict || validated.region}
+          <Check className="w-3 h-3 shrink-0" strokeWidth={3} />
+          {okText || validated?.adminDistrict || validated?.region}
         </div>
       )}
-      {error && (
-        <div className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5">
-          <AlertCircle className="w-3 h-3" /> {error}
+      {errorText && (
+        <div role="alert" className="mt-1.5 text-xs text-red-600 flex items-start gap-1.5">
+          <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" /> <span>{errorText}</span>
         </div>
       )}
 

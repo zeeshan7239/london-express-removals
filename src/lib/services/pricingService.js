@@ -1,15 +1,13 @@
 import config from './pricingConfig.js';
 
-export const extractDistrict = (postcode) => {
-  if (!postcode) return null;
-  const cleaned = postcode.toUpperCase().replace(/\s+/g, '');
-  if (cleaned.length < 5) return null;
-  const outward = cleaned.slice(0, cleaned.length - 3);
-  return outward.replace(/[A-Z]$/, '') || outward;
-};
-
-const M25_CENTRE = { lat: 51.5074, lon: -0.1278 };
-const M25_RADIUS_KM = 25;
+/**
+ * Pricing engine. Pure functions: no network, no database.
+ *
+ * Whether a postcode is inside the London / M25 service area is NOT decided
+ * here any more. That check lives in serviceArea.js, runs on the server and
+ * uses the real position of the postcode. Callers pass in positions that the
+ * server has already verified (pickupLatLng / deliveryLatLng).
+ */
 
 const haversineKm = (a, b) => {
   if (!a || !b || a.lat == null || b.lat == null) return null;
@@ -25,28 +23,6 @@ const haversineKm = (a, b) => {
 
 const kmToMiles = (km) => (km == null ? null : km * 0.621371);
 
-export const isInsideM25 = (postcode, latlng) => {
-  if (latlng && latlng.lat != null && latlng.lon != null) {
-    const d = haversineKm(M25_CENTRE, latlng);
-    return d != null && d <= M25_RADIUS_KM;
-  }
-  const district = extractDistrict(postcode);
-  if (!district) return false;
-  return config.m25Districts.includes(district);
-};
-
-export const coverageCheck = (pickupPostcode, deliveryPostcode, pickupLatLng, deliveryLatLng) => {
-  const pickupInside = isInsideM25(pickupPostcode, pickupLatLng);
-  const deliveryInside = isInsideM25(deliveryPostcode, deliveryLatLng);
-  const distanceKm = haversineKm(pickupLatLng, deliveryLatLng);
-  return {
-    pickupInside, deliveryInside, bothInside: pickupInside && deliveryInside,
-    pickupDistrict: extractDistrict(pickupPostcode),
-    deliveryDistrict: extractDistrict(deliveryPostcode),
-    distanceKm, distanceMiles: kmToMiles(distanceKm),
-  };
-};
-
 export const floorToBand = (floor) => {
   if (!floor) return 0;
   const f = String(floor).toLowerCase().trim();
@@ -58,6 +34,8 @@ export const floorToBand = (floor) => {
       (/\d+/.test(f) && parseInt(f, 10) >= 6)) return 3;
   return 1;
 };
+
+export const MOVERS_TO_TEAM = { '1 Man': 'driverHelp', '2 Men': 'twoMen', '3 Men': 'threeMen' };
 
 const moversToTeams = (moversNeeded) => {
   if (!moversNeeded) return ['driverHelp', 'twoMen'];
@@ -78,10 +56,51 @@ const isShortTripEligible = ({ travelMinutes, pickupBand, deliveryBand, property
   return true;
 };
 
+// ── Packing materials (boxes, wrap, tape) ───────────────────────────────────
+
+const cleanQty = (v, max = 500) => Math.min(max, Math.max(0, Math.floor(Number(v) || 0)));
+
+export const normalisePacking = (packing = {}) => ({
+  smallBoxes: cleanQty(packing.smallBoxes),
+  mediumBoxes: cleanQty(packing.mediumBoxes),
+  largeBoxes: cleanQty(packing.largeBoxes),
+  bubbleWrapRolls: cleanQty(packing.bubbleWrapRolls, 100),
+  tapeRolls: cleanQty(packing.tapeRolls, 100),
+});
+
+export const packingMaterialsTotal = (packing = {}, wanted = true) => {
+  if (!wanted) return 0;
+  const p = normalisePacking(packing);
+  const m = config.packingMaterials;
+  return p.smallBoxes * m.boxes.small.price
+    + p.mediumBoxes * m.boxes.medium.price
+    + p.largeBoxes * m.boxes.large.price
+    + p.bubbleWrapRolls * m.bubbleWrap.price
+    + p.tapeRolls * m.tape.price;
+};
+
+// ── Extra services (packing service, dismantling, reassembly) ───────────────
+
+export const normaliseServices = (services = {}) => ({
+  packingService: !!services.packingService,
+  dismantling: !!services.dismantling,
+  reassembly: !!services.reassembly,
+});
+
+const extraServiceLines = (services) => {
+  const s = normaliseServices(services);
+  return Object.keys(config.extraServices)
+    .filter((k) => s[k])
+    .map((k) => ({ key: k, label: config.extraServices[k].label, amount: Number(config.extraServices[k].price) || 0 }));
+};
+
+// ── One team ────────────────────────────────────────────────────────────────
+
 const priceForTeam = (teamKey, params) => {
   const {
     pickupFloor, pickupHasLift, deliveryFloor, deliveryHasLift,
     propertyType, distanceMiles = 0, travelMinutes, hours,
+    services, packing, wantsPacking,
   } = params;
 
   const pickupBand = floorToBand(pickupFloor);
@@ -92,16 +111,21 @@ const priceForTeam = (teamKey, params) => {
     : config.teams[teamKey];
   if (!teamCfg) return null;
 
-  const surchargeFor = (band, hasLift) => {
+  // Floor charge — added once, at ANY booking length (2h and beyond).
+  const chargeFor = (band, hasLift) => {
     if (band === 0) return 0;
     const tier = config.floorSurcharge[band];
     if (!tier) return 0;
     return tier[hasLift ? 'withLift' : 'withoutLift']?.[teamKey] ?? 0;
   };
-
-  const pickupSurcharge = surchargeFor(pickupBand, pickupHasLift);
-  const deliverySurcharge = surchargeFor(deliveryBand, deliveryHasLift);
-  const floorSurcharge = Math.max(pickupSurcharge, deliverySurcharge);
+  const pickupCharge = chargeFor(pickupBand, pickupHasLift);
+  const deliveryCharge = chargeFor(deliveryBand, deliveryHasLift);
+  const mode = config.floorChargeMode === 'sum' ? 'sum' : 'highest';
+  const floorCharge = mode === 'sum' ? pickupCharge + deliveryCharge : Math.max(pickupCharge, deliveryCharge);
+  const floorDetail = [
+    pickupCharge > 0 ? `pickup ${pickupFloor}, ${pickupHasLift ? 'lift' : 'no lift'}` : null,
+    deliveryCharge > 0 ? `delivery ${deliveryFloor}, ${deliveryHasLift ? 'lift' : 'no lift'}` : null,
+  ].filter(Boolean).join(' / ');
 
   const billableMiles = shortTrip ? 0 : Math.max(0, distanceMiles - config.distance.freeMiles);
   const distanceFee = Math.round(billableMiles * config.distance.perMileRate);
@@ -110,11 +134,30 @@ const priceForTeam = (teamKey, params) => {
   const multiplier = shortTrip ? 1 : (property?.multiplier ?? 1);
   const adjustedBase = Math.round(teamCfg.basePrice * multiplier);
 
-  const requestedHours = Number(hours) || teamCfg.includedHours;
+  const requestedHours = Math.min(12, Math.max(teamCfg.includedHours, Number(hours) || teamCfg.includedHours));
   const extraHours = Math.max(0, requestedHours - teamCfg.includedHours);
   const extraHoursFee = extraHours * teamCfg.extraHourRate;
 
-  const total = adjustedBase + floorSurcharge + distanceFee + extraHoursFee;
+  const serviceLines = extraServiceLines(services);
+  const servicesTotal = serviceLines.reduce((n, l) => n + l.amount, 0);
+  const materialsTotal = packingMaterialsTotal(packing, wantsPacking);
+
+  const total = adjustedBase + extraHoursFee + floorCharge + distanceFee + servicesTotal + materialsTotal;
+
+  const breakdown = [
+    { key: 'base', label: `${teamCfg.label} — first ${teamCfg.includedHours} hours`, amount: adjustedBase },
+    ...(extraHours > 0
+      ? [{ key: 'extraHours', label: `Extra time — ${extraHours} hour${extraHours > 1 ? 's' : ''} × £${teamCfg.extraHourRate}`, amount: extraHoursFee }]
+      : []),
+    ...(floorCharge > 0
+      ? [{ key: 'floor', label: `Floor charge (${floorDetail})`, amount: floorCharge }]
+      : []),
+    ...(distanceFee > 0
+      ? [{ key: 'distance', label: `Distance (${Math.ceil(billableMiles)} mi over ${config.distance.freeMiles})`, amount: distanceFee }]
+      : []),
+    ...serviceLines.filter((l) => l.amount > 0).map((l) => ({ key: l.key, label: l.label, amount: l.amount })),
+    ...(materialsTotal > 0 ? [{ key: 'materials', label: 'Packing materials', amount: materialsTotal }] : []),
+  ];
 
   return {
     teamKey,
@@ -122,50 +165,49 @@ const priceForTeam = (teamKey, params) => {
     sublabel: shortTrip ? 'Short-trip rate' : teamCfg.sublabel,
     isShortTrip: shortTrip,
     basePrice: teamCfg.basePrice,
-    adjustedBase, floorSurcharge, distanceFee,
+    adjustedBase,
+    floorSurcharge: floorCharge, // kept under the old name for existing readers
+    floorCharge,
+    distanceFee,
     extraHours, extraHoursFee,
+    extraServicesTotal: servicesTotal,
+    packingMaterialsTotal: materialsTotal,
     extraHourRate: teamCfg.extraHourRate,
     includedHours: teamCfg.includedHours,
-    requestedHours, total,
-    breakdown: [
-      { label: `${teamCfg.label} — ${requestedHours}h booking`, amount: adjustedBase + extraHoursFee },
-      ...(floorSurcharge > 0 ? [{ label: 'Floor surcharge', amount: floorSurcharge }] : []),
-      ...(distanceFee > 0 ? [{ label: `Distance (${Math.ceil(billableMiles)} mi over ${config.distance.freeMiles})`, amount: distanceFee }] : []),
-    ],
+    requestedHours,
+    total,
+    breakdown,
   };
 };
 
+/**
+ * Price a move.
+ * pickupLatLng / deliveryLatLng must be positions verified by the server.
+ */
 export const calculatePrice = (params = {}) => {
   const {
-    pickupPostcode, deliveryPostcode, pickupLatLng, deliveryLatLng,
+    pickupLatLng, deliveryLatLng,
     pickupFloor, pickupHasLift, deliveryFloor, deliveryHasLift,
-    propertyType, moversNeeded, distanceMiles, travelMinutes, hours,
+    propertyType, moversNeeded, hours, services, packing, wantsPacking,
   } = params;
 
-  const coverage = coverageCheck(pickupPostcode, deliveryPostcode, pickupLatLng, deliveryLatLng);
-  if (!coverage.bothInside) {
-    return {
-      ok: false, reason: 'outside_m25',
-      message: 'For locations outside the M25, please request a custom quote.',
-      coverage,
-    };
+  if (!pickupLatLng || !deliveryLatLng || pickupLatLng.lat == null || deliveryLatLng.lat == null) {
+    return { ok: false, reason: 'location_unverified', message: 'Both postcodes must be verified before a price can be shown.' };
   }
 
-  const finalDistanceMiles = coverage.distanceMiles != null ? coverage.distanceMiles : Number(distanceMiles) || 0;
-  const finalTravelMinutes = travelMinutes != null
-    ? Number(travelMinutes)
-    : Math.round((finalDistanceMiles / 15) * 60 + 10);
+  const distanceKm = haversineKm(pickupLatLng, deliveryLatLng);
+  const distanceMiles = kmToMiles(distanceKm);
+  const travelMinutes = Math.round((distanceMiles / 15) * 60 + 10);
 
-  const teamKeys = moversToTeams(moversNeeded);
-  const teams = teamKeys.map((k) => priceForTeam(k, {
+  const teams = moversToTeams(moversNeeded).map((k) => priceForTeam(k, {
     pickupFloor, pickupHasLift, deliveryFloor, deliveryHasLift,
-    propertyType, distanceMiles: finalDistanceMiles,
-    travelMinutes: finalTravelMinutes, hours,
+    propertyType, distanceMiles, travelMinutes, hours,
+    services, packing, wantsPacking,
   })).filter(Boolean);
 
   return {
     ok: true,
-    coverage: { ...coverage, travelMinutes: finalTravelMinutes },
+    coverage: { bothInside: true, distanceKm, distanceMiles, travelMinutes },
     propertyType,
     suggestedHours: config.propertyTypes[propertyType]?.suggestedHours || config.durations.defaultHours,
     teams,

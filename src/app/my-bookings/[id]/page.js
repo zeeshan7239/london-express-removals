@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/components/common/AuthContext';
 import { siteConfig } from '@/lib/utils/siteConfig';
 import api from '@/lib/utils/api';
+import FlatPackDetails from '@/components/quote/FlatPackDetails';
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-GB', {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
@@ -132,6 +133,8 @@ export default function MyBookingDetailPage() {
               {booking.distanceMiles && <Detail icon={MapPin} label="Distance" value={`${booking.distanceMiles.toFixed(1)} miles`} />}
             </div>
           </div>
+
+          <FlatPackDetails flatPack={booking.flatPack} removalPrice={booking.estimatedPrice} />
 
           {/* Notes */}
           {booking.notes && (

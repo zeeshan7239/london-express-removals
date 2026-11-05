@@ -5,6 +5,7 @@ import { getCurrentUser, requireAdmin, AuthError } from '@/lib/middleware/auth.j
 import { sendQuoteEmails } from '@/lib/services/emailService.js';
 import { sendWhatsAppNotification } from '@/lib/services/whatsappService.js';
 import { getAvailableTimeSlots } from '@/lib/utils/timeSlots.js';
+import { guardBooking, stripForbiddenFields, GuardError } from '@/lib/services/bookingGuard.js';
 
 // POST /api/quotes — create a new booking or quote (public)
 export async function POST(req) {
@@ -12,8 +13,14 @@ export async function POST(req) {
     await connectDB();
     const body = await req.json();
 
-    const payload = { ...body };
+    let payload = stripForbiddenFields(body);
     if (!payload.kind) payload.kind = 'booking';
+
+    // ── Standard bookings: postcodes + price are verified on the server ─────────
+    // (London / M25 only; anything else must use the custom-quote form.)
+    if (payload.kind === 'booking') {
+      payload = await guardBooking(payload);
+    }
 
     // ── Server-side same-day time validation ──────────────────────────────────
     // Defence in depth: even if the client is bypassed, reject bookings
@@ -55,6 +62,12 @@ export async function POST(req) {
       quote,
     }, { status: 201 });
   } catch (err) {
+    if (err instanceof GuardError) {
+      return NextResponse.json(
+        { success: false, code: err.code, message: err.message, ...err.extra },
+        { status: err.status }
+      );
+    }
     return NextResponse.json(
       { success: false, message: err.message || 'Could not create quote' },
       { status: err.name === 'ValidationError' ? 400 : 500 }

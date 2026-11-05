@@ -43,7 +43,7 @@ export default function TermsPage() {
 
           <h2 className="font-display font-bold text-2xl mt-8 mb-3">5. Contact</h2>
           <p className="text-ink-700 leading-relaxed mb-4">
-            For any questions about these terms, contact us at <a href="mailto:bookings@londonexpressremovals.co.uk" className="text-ember-600 underline">bookings@londonexpressremovals.co.uk</a>.
+            For any questions about these terms, contact us at <a href="mailto:info@londonexpressremovals.co.uk" className="text-ember-600 underline">info@londonexpressremovals.co.uk</a>.
           </p>
         </div>
       </section>
