@@ -3,41 +3,23 @@
  *
  * Business hours: 07:00 – 21:00, in 30-minute increments.
  *
- * On same-day bookings, slots that have already passed are hidden.
- * A 30-minute preparation buffer is added, then rounded up to the next :00 or :30.
+ * Rules (all in UK time, Europe/London, on both the browser and the server):
+ *   1. Today: only slots at least 5 hours after the current UK time.
+ *   2. Tomorrow or later: every slot is available (the 5-hour rule only ever
+ *      reaches into tomorrow before 05:00, and the first slot is 07:00).
+ *   3. Midnight: the 5-hour window rolls into the next day, e.g. at 22:00 the
+ *      earliest booking is 03:00 tomorrow. Today then has no slots and the date
+ *      moves on to tomorrow by itself. Because the first slot of the day is
+ *      07:00, that booking shows as 07:00 tomorrow.
+ *   4. A slot that has passed is never offered.
  *
- * Examples (rounding UP to next slot):
- *   Now 08:10 → earliest 08:30
- *   Now 12:51 → earliest 13:30   (12:51 + 30 min = 13:21 → round up to 13:30)
- *   Now 18:40 → earliest 19:00   (18:40 + 30 min = 19:10 → round up to 19:30)
- *   ...well, 19:10 rounds up to 19:30, but the spec says "6:40 PM → 7:00 PM".
- *
- * Reading the spec's third example carefully: 18:40 + 20 min = 19:00.
- * So the effective buffer is "at least 20 minutes, then align to next :00 or :30".
- * Simpler equivalent rule: add 30 min, then round DOWN to the nearest :00 or :30.
- *
- * Let's verify all three examples with "add 30, round down":
- *   08:10 + 30 = 08:40 → round down to 08:30 ✓
- *   12:51 + 30 = 13:21 → round down to 13:00 ✗ (spec says 13:30)
- *
- * Neither simple formula fits all three. The spec's own example for 12:51 gives
- * 13:30 — that's +39 min. The 18:40 example gives 19:00 — that's +20 min.
- * There's no consistent buffer size. The pattern that matches all three is:
- *   "Add 30 minutes, then round UP to the next :00 or :30 slot."
- *     08:10 + 30 = 08:40 → next slot 09:00 ✗ (spec says 08:30)
- *
- * The one rule that matches ALL three examples: "Round the current time UP to
- * the NEXT 30-min slot AFTER adding a 20-minute buffer".
- *     08:10 + 20 = 08:30 → 08:30 (already on slot boundary — round up to 08:30) ✓
- *     12:51 + 20 = 13:11 → round up to 13:30 ✓
- *     18:40 + 20 = 19:00 → 19:00 (on boundary) ✓
- *
- * That's the rule we implement: **20-minute buffer + round UP to next 30-min slot.**
+ * The cut-off is "now + 5 hours" measured on one continuous timeline, so the
+ * date changes automatically at midnight and across daylight-saving changes.
  */
 
 const OPEN_HOUR  = 7;   // 07:00
 const CLOSE_HOUR = 21;  // 21:00
-const BUFFER_MIN = 20;  // minutes of preparation time
+const LEAD_MIN   = 5 * 60; // minimum notice: 5 hours
 
 /** Every 30-minute slot from 07:00 to 21:00 inclusive, as "HH:MM" strings. */
 const ALL_SLOTS = (() => {
@@ -58,6 +40,25 @@ const toMinutes = (t) => {
   return h * 60 + m;
 };
 
+const DAY = 1440;
+
+/** Current UK date ('YYYY-MM-DD') and minutes since UK midnight. */
+export const getUkNow = (now = new Date()) => {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(now).reduce((o, p) => { o[p.type] = p.value; return o; }, {});
+  return {
+    dateStr: `${parts.year}-${parts.month}-${parts.day}`,
+    minutes: Number(parts.hour) * 60 + Number(parts.minute),
+  };
+};
+
+/** Whole days from one 'YYYY-MM-DD' to another (no time-zone issues). */
+const dayDiff = (from, to) => Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000);
+
+const addDays = (dateStr, n) => new Date(Date.parse(`${dateStr}T00:00:00Z`) + n * 86400000).toISOString().slice(0, 10);
+
 /**
  * Return the list of bookable time slots for a given date.
  *
@@ -66,33 +67,29 @@ const toMinutes = (t) => {
  *               Injectable for deterministic testing.
  *
  * Returns { slots: string[], sameDayClosed: boolean }
- *   - slots: available slot strings ("07:00", "07:30", ...)
- *   - sameDayClosed: true when it's today and every slot has passed the cut-off.
- *                    The UI uses this to show the "no longer available today"
- *                    message and force the customer to pick another date.
+ *   - sameDayClosed: true when the date is today (or past) and no slot is left.
  */
 export const getAvailableTimeSlots = (dateString, now = new Date()) => {
-  // Empty / invalid date → no restriction (assume future date)
   if (!dateString) return { slots: getAllTimeSlots(), sameDayClosed: false };
 
-  // "Today" is computed in the user's local time — matches what a browser shows
-  // in the <input type="date"> control and what the customer sees in the UI.
-  const pad = (n) => String(n).padStart(2, '0');
-  const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const uk = getUkNow(now);
+  const days = dayDiff(uk.dateStr, dateString);
+  if (Number.isNaN(days) || days < 0) return { slots: [], sameDayClosed: true };
 
-  // Future date → full slot list, no filtering
-  if (dateString > todayStr) return { slots: getAllTimeSlots(), sameDayClosed: false };
+  // Slots must start at or after (now + 5h), measured from UK midnight today.
+  const cutoff = uk.minutes + LEAD_MIN;
+  const slots = ALL_SLOTS.filter((slot) => days * DAY + toMinutes(slot) >= cutoff);
+  return { slots, sameDayClosed: days === 0 && slots.length === 0 };
+};
 
-  // Past date → nothing bookable (defensive; UI's min=today should prevent this)
-  if (dateString < todayStr) return { slots: [], sameDayClosed: true };
-
-  // ── Same-day logic ─────────────────────────────────────────────────────────
-  // Add the buffer, then round UP to the next 30-minute mark.
-  const bufferedMinutes = now.getHours() * 60 + now.getMinutes() + BUFFER_MIN;
-  const earliestMinutes = Math.ceil(bufferedMinutes / 30) * 30;
-
-  const slots = ALL_SLOTS.filter((slot) => toMinutes(slot) >= earliestMinutes);
-  return { slots, sameDayClosed: slots.length === 0 };
+/**
+ * Earliest date the customer can pick: today (UK) if any slot is left,
+ * otherwise tomorrow. Used as the date input's minimum so the date rolls over
+ * by itself after the last slot.
+ */
+export const getBookingMinDate = (now = new Date()) => {
+  const uk = getUkNow(now);
+  return getAvailableTimeSlots(uk.dateStr, now).slots.length ? uk.dateStr : addDays(uk.dateStr, 1);
 };
 
 /** Convert "14:30" → "02:30 PM" for display. */

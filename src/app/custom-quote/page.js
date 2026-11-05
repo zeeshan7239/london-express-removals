@@ -17,7 +17,7 @@ import AddressAutocomplete from '@/components/quote/AddressAutocomplete';
 import FlatPackFields, { flatPackPayload, flatPackFormError } from '@/components/quote/FlatPackFields';
 import { isValidEmail, isValidUKPhone } from '@/lib/utils/validation';
 import { siteConfig } from '@/lib/utils/siteConfig';
-import { getAvailableTimeSlots, formatTime12h } from '@/lib/utils/timeSlots';
+import { getAvailableTimeSlots, getBookingMinDate, formatTime12h } from '@/lib/utils/timeSlots';
 import api from '@/lib/utils/api';
 
 const propertyTypeOptions = ['House', 'Flat', 'Office', 'Storage', 'Other'];
@@ -47,7 +47,7 @@ export default function CustomQuotePageWrapper() {
 
 function CustomQuotePage() {
   const searchParams = useSearchParams();
-  const today = new Date().toISOString().split('T')[0];
+  const [today, setToday] = useState(() => getBookingMinDate()); // earliest bookable date (UK time)
 
   const [submitting, setSubmitting] = useState(false);
   const [done,       setDone]       = useState(false);
@@ -107,6 +107,17 @@ function CustomQuotePage() {
     const id = setInterval(() => setNowTick((n) => n + 1), 60_000);
     return () => clearInterval(id);
   }, []);
+
+  // Earliest bookable date rolls forward by itself; an out-of-date choice moves on.
+  useEffect(() => {
+    const min = getBookingMinDate();
+    setToday(min);
+    if (movingDate && movingDate < min) {
+      setMovingDate(min);
+      toast('Your date moved to the next available day.', { icon: '📅', id: 'date-moved' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nowTick, movingDate]);
 
   const { slots: availableTimeSlots, sameDayClosed } = useMemo(
     () => getAvailableTimeSlots(movingDate, new Date()),

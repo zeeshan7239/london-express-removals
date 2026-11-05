@@ -7,7 +7,7 @@ import { MapPin, Flag, Calendar, Clock, Home, ChevronRight, AlertTriangle, Phone
 import toast from 'react-hot-toast';
 import PostcodeAutocomplete from '@/components/quote/PostcodeAutocomplete';
 import useServiceArea from '@/components/quote/useServiceArea';
-import { getAvailableTimeSlots, formatTime12h } from '@/lib/utils/timeSlots';
+import { getAvailableTimeSlots, getBookingMinDate, formatTime12h } from '@/lib/utils/timeSlots';
 import { UK_POSTCODE_REGEX } from '@/lib/utils/validation';
 import { siteConfig } from '@/lib/utils/siteConfig';
 
@@ -28,8 +28,8 @@ export default function HeroBookingForm() {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    setToday(todayStr());
-    const id = setInterval(() => setTick((n) => n + 1), 60_000);
+    setToday(getBookingMinDate());
+    const id = setInterval(() => { setTick((n) => n + 1); setToday(getBookingMinDate()); }, 60_000);
     return () => clearInterval(id);
   }, []);
 
@@ -38,6 +38,10 @@ export default function HeroBookingForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [movingDate, tick]
   );
+
+  useEffect(() => {
+    if (today && movingDate && movingDate < today) setMovingDate(today); // date rolls forward by itself
+  }, [today, movingDate]);
 
   useEffect(() => {
     if (preferredTime && !slots.includes(preferredTime)) setPreferredTime('');

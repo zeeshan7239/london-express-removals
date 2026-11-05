@@ -23,7 +23,7 @@ import { useAuth } from '@/components/common/AuthContext';
 import { isValidEmail, isValidUKPhone } from '@/lib/utils/validation';
 import { siteConfig } from '@/lib/utils/siteConfig';
 import useServiceArea from '@/components/quote/useServiceArea';
-import { getAvailableTimeSlots, formatTime12h } from '@/lib/utils/timeSlots';
+import { getAvailableTimeSlots, getBookingMinDate, formatTime12h } from '@/lib/utils/timeSlots';
 import api from '@/lib/utils/api';
 
 const movingTypes = [
@@ -62,7 +62,7 @@ const emptyStop = () => ({ postcode: '', address: '', floor: '', access: '', lat
 
 export default function BookingPage() {
   const { user } = useAuth();
-  const today = new Date().toISOString().split('T')[0];
+  const [today, setToday] = useState(() => getBookingMinDate()); // earliest bookable date (UK time)
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -146,6 +146,18 @@ export default function BookingPage() {
     const id = setInterval(() => setNowTick((n) => n + 1), 60_000);
     return () => clearInterval(id);
   }, []);
+
+  // The earliest bookable date rolls forward by itself (e.g. after the last slot today,
+  // or at midnight). A date that is no longer bookable moves to the new earliest date.
+  useEffect(() => {
+    const min = getBookingMinDate();
+    setToday(min);
+    if (data.movingDate && data.movingDate < min) {
+      set('movingDate', min);
+      toast('Your date moved to the next available day.', { icon: '📅', id: 'date-moved' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nowTick, data.movingDate]);
 
   const { slots: availableTimeSlots, sameDayClosed } = useMemo(
     () => getAvailableTimeSlots(data.movingDate, new Date()),
