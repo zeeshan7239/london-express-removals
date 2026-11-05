@@ -6,9 +6,10 @@ import { Home, Loader2, Check, ChevronDown, MapPin, AlertCircle } from 'lucide-r
 import toast from 'react-hot-toast';
 import { UK_POSTCODE_REGEX } from '@/lib/utils/validation';
 
-export default function AddressPicker({ postcode, value = '', onChange, label = 'Full address', disabled = false }) {
+export default function AddressPicker({ postcode, value = '', onChange, onPick, label = 'Full address', disabled = false }) {
   const [open, setOpen] = useState(false);
   const [addresses, setAddresses] = useState([]);
+  const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(false);
   const [manualMode, setManualMode] = useState(false);
   const ref = useRef(null);
@@ -32,12 +33,14 @@ export default function AddressPicker({ postcode, value = '', onChange, label = 
           const json = await res.json();
           if (json.addresses?.length) {
             setAddresses(json.addresses);
+            setPlaces(json.places || []);
             setManualMode(false);
             return;
           }
         }
         setManualMode(true);
         setAddresses([]);
+        setPlaces([]);
       } catch {
         setManualMode(true);
       } finally {
@@ -61,7 +64,7 @@ export default function AddressPicker({ postcode, value = '', onChange, label = 
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="House name/number and street"
+          placeholder="House number and street, e.g. 150 Osborne Square"
           disabled={disabled}
           className="input-field"
         />
@@ -97,7 +100,7 @@ export default function AddressPicker({ postcode, value = '', onChange, label = 
                   <button
                     key={i}
                     type="button"
-                    onClick={() => { onChange(a); setOpen(false); toast.success('Address selected', { duration: 1800 }); }}
+                    onClick={() => { onChange(a); if (places[i]) onPick?.(places[i]); setOpen(false); toast.success('Address selected', { duration: 1800 }); }}
                     className="w-full text-left px-4 py-2.5 text-sm font-medium text-ink-700 hover:bg-ember-50 hover:text-ember-700 transition flex items-center gap-2.5"
                   >
                     <MapPin className="w-3.5 h-3.5 text-ink-400 shrink-0" />

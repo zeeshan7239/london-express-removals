@@ -633,6 +633,7 @@ export default function BookingPage() {
                           sideData={data.pickup} areaStatus={pickupArea}
                           setSide={(k, v) => set(`pickup.${k}`, v)}
                           onAddressSelect={p => mergeSide('pickup', googleFill(p))}
+                          onAddressPick={p => mergeSide('pickup', { placeId: p.placeId, lat: p.lat, lon: p.lon })}
                           onPostcodeSelect={d => mergeSide('pickup', d
                             ? { postcode: d.postcode, lat: d.latitude, lon: d.longitude }
                             : { lat: null, lon: null })} />
@@ -660,7 +661,8 @@ export default function BookingPage() {
                                   ? { postcode: d.postcode, lat: d.latitude, lon: d.longitude }
                                   : { lat: null, lon: null })} />
                               <AddressPicker postcode={s.postcode} value={s.address}
-                                onChange={v => setStop(i, { address: v })} />
+                                onChange={v => setStop(i, { address: v })}
+                                onPick={p => setStop(i, { placeId: p.placeId, lat: p.lat, lon: p.lon })} />
                             </div>
                             <FloorAndAccess side={`stop-${i}`} data={s}
                               set={(k, v) => setStop(i, { [k]: v })} />
@@ -681,6 +683,7 @@ export default function BookingPage() {
                             sideData={data.delivery} areaStatus={deliveryArea}
                             setSide={(k, v) => set(`delivery.${k}`, v)}
                             onAddressSelect={p => mergeSide('delivery', googleFill(p))}
+                            onAddressPick={p => mergeSide('delivery', { placeId: p.placeId, lat: p.lat, lon: p.lon })}
                             onPostcodeSelect={d => mergeSide('delivery', d
                               ? { postcode: d.postcode, lat: d.latitude, lon: d.longitude }
                               : { lat: null, lon: null })} />
@@ -1177,7 +1180,7 @@ export default function BookingPage() {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function LocationBlock({ label, dotColor, side, sideData, setSide, onPostcodeSelect, onAddressSelect, areaStatus }) {
+function LocationBlock({ label, dotColor, side, sideData, setSide, onPostcodeSelect, onAddressSelect, onAddressPick, areaStatus }) {
   return (
     <div>
       <div className="text-sm font-bold text-ink-900 mb-3 flex items-center gap-2">
@@ -1192,7 +1195,7 @@ function LocationBlock({ label, dotColor, side, sideData, setSide, onPostcodeSel
           onChange={v => setSide('postcode', v)}
           onSelect={onPostcodeSelect} />
         <AddressPicker postcode={sideData.postcode} value={sideData.address}
-          onChange={v => setSide('address', v)} />
+          onChange={v => setSide('address', v)} onPick={onAddressPick} />
       </div>
       <FloorAndAccess side={side} data={sideData} set={setSide} />
     </div>
