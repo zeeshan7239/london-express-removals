@@ -20,7 +20,7 @@ export default function UserMenu({ inverted = false }) {
   }, []);
 
   if (loading) {
-    return <div className="w-9 h-9 rounded-full bg-ink-100 animate-pulse" />;
+    return <div aria-hidden="true" className="hidden sm:block w-[68px] h-5 rounded-full bg-ink-100 animate-pulse" />;
   }
 
   // Logged out

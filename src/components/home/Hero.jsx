@@ -18,7 +18,7 @@ export default async function Hero() {
 
       {/* Hero background image — fills the whole section; everything else sits on top */}
       <div className="absolute inset-0 pointer-events-none select-none" aria-hidden="true">
-        <NextImage src={HERO_VAN_SRC} alt="" fill priority sizes="100vw"
+        <NextImage src={HERO_VAN_SRC} alt="" fill priority quality={70} sizes="100vw"
           className="object-cover object-[35%_center] lg:object-center" />
         {/* Dark overlay so text and form stay readable; lower the numbers to show more of the image */}
         <div className="absolute inset-0 bg-gradient-to-r from-ink-950/95 via-ink-950/75 to-ink-950/40" />

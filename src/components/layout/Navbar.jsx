@@ -120,8 +120,9 @@ export default function Navbar() {
             <Image
               src="/logo.png"
               alt="London Express Removals"
-              width={805}
-              height={805}
+              width={497}
+              height={502}
+              sizes="(max-width: 640px) 56px, (max-width: 768px) 88px, (max-width: 1024px) 128px, 160px"
               priority
              className="h-14 sm:h-[88px] md:h-32 lg:h-40 lg:mt-4 w-auto max-w-[60vw] object-contain select-none transition-transform duration-200 group-hover:rotate-3"
             />

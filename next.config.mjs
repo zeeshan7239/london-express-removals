@@ -3,6 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
 
   images: {
+    formats: ['image/avif', 'image/webp'],
+    qualities: [70, 75],
     remotePatterns: [
       // Allow all HTTPS image sources (covers Cloudinary, getAddress, any CDN)
       { protocol: 'https', hostname: '**' },

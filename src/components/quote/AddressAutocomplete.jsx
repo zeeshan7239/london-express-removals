@@ -7,7 +7,7 @@ import { parsePlace } from '@/lib/utils/placeParsing';
 /**
  * Google Places (New) address search — UK only.
  * Suggestions come straight from Google with the browser key
- * (NEXTs_GOOGLE_MAPS_KEY, restricted to our website addresses). When a
+ * (NEXT_PUBLIC_GOOGLE_MAPS_KEY, restricted to our website addresses). When a
  * suggestion is chosen we fetch its details and hand the parts to onSelect.
  * The server checks the place again with its own key, so what the browser
  * says about location is never trusted.
@@ -16,7 +16,7 @@ import { parsePlace } from '@/lib/utils/placeParsing';
  * + address fields below keep working, so nobody is ever stuck.
  */
 const API = 'https://places.googleapis.com/v1';
-const KEY = process.env.NEXT_GOOGLE_MAPS_KEY;
+const KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
 
 const newToken = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
 

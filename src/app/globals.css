@@ -69,6 +69,11 @@ body {
   background-size: 48px 48px;
 }
 
+/* Perf: the reviews scroller combines scroll-snap with smooth scrolling, which makes
+   Chrome drop the LCP entry on narrow screens at load. Arrow buttons still scroll
+   smoothly via JS (scrollBy), so UX is unchanged. */
+[aria-label="Customer reviews"] { scroll-behavior: auto; }
+
 .bg-grid-dark {
   background-image:
     linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
