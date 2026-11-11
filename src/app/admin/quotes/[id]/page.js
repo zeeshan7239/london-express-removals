@@ -142,9 +142,11 @@ export default function QuoteDetailPage() {
             <div className="grid sm:grid-cols-2 gap-4">
               <Detail icon={Package} label="Type" value={quote.movingType} />
               <Detail icon={Calendar} label="Date" value={formatDate(quote.movingDate)} />
-              {quote.preferredTime && (
-                <Detail icon={Clock} label="Preferred time" value={formatTime12h(quote.preferredTime)} />
-              )}
+              <Detail icon={Clock} label="Preferred start time" value={
+                quote.preferredTime
+                  ? formatTime12h(quote.preferredTime)
+                  : <span className="text-ink-500 font-normal">Not specified</span>
+              } />
               <Detail icon={Users} label="Movers" value={quote.moversNeeded} />
               {quote.durationHours && <Detail icon={Clock} label="Duration" value={`${quote.durationHours} hours`} />}
               <Detail icon={MapPin} label="Pickup" value={
@@ -210,6 +212,18 @@ export default function QuoteDetailPage() {
               </div>
             </div>
           )}
+
+          {/* Extra services: always shown, so "No" is visible too */}
+          <div className="bg-white rounded-3xl border border-ink-100 p-5 lg:p-7">
+            <h3 className="font-display font-bold text-sm mb-3 uppercase tracking-wider text-ink-500 flex items-center gap-2">
+              <Wrench className="w-3.5 h-3.5" /> Extra services
+            </h3>
+            <div className="grid sm:grid-cols-3 gap-4">
+              <ServiceFlag label="Dismantling" on={!!quote.propertyDetails?.dismantling} />
+              <ServiceFlag label="Reassembly" on={!!quote.propertyDetails?.reassembly} />
+              <ServiceFlag label="Packing service" on={!!quote.propertyDetails?.packingService} />
+            </div>
+          </div>
 
           {/* Packing materials */}
           {quote.packingMaterials?.requested && (
@@ -298,6 +312,18 @@ function Detail({ icon: Icon, label, value }) {
       <div className="flex-1 min-w-0">
         <div className="text-[10px] uppercase tracking-wider text-ink-500 font-semibold">{label}</div>
         <div className="text-sm font-semibold text-ink-900">{value}</div>
+      </div>
+    </div>
+  );
+}
+
+function ServiceFlag({ label, on }) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <Wrench className="w-4 h-4 text-ember-500 mt-1 shrink-0" />
+      <div className="flex-1 min-w-0">
+        <div className="text-[10px] uppercase tracking-wider text-ink-500 font-semibold">{label}</div>
+        <div className={`text-sm font-semibold ${on ? 'text-ember-600' : 'text-ink-500'}`}>{on ? 'Required' : 'Not required'}</div>
       </div>
     </div>
   );

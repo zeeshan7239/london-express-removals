@@ -86,6 +86,10 @@ export const guardBooking = async (rawPayload, opts) => {
   const fpError = flatPackError(payload.flatPack);
   if (fpError) throw new GuardError(400, 'INVALID_FLAT_PACK', fpError);
 
+  if (!payload.preferredTime) {
+    throw new GuardError(400, 'TIME_REQUIRED', 'Please choose a preferred start time.');
+  }
+
   const verified = await verifyLocations(payload, opts);
 
   // Replace anything the browser sent with what we verified ourselves.

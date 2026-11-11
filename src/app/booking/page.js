@@ -395,6 +395,7 @@ export default function BookingPage() {
           return { message: 'Please select delivery lift or stairs.', fieldId: 'delivery-access' };
         if (!data.movingDate)        return { message: 'Please choose your moving date.',      fieldId: 'moving-date' };
         if (sameDayClosed)           return { message: 'Online booking for today is no longer available. Please select another date or contact us directly.', fieldId: 'moving-date' };
+        if (!data.preferredTime)     return { message: 'Please choose your preferred start time.', fieldId: 'preferred-time' };
         return null;
       }
       case 3: return flatPackFormError(flatPack); // packing / dismantling / reassembly are optional
@@ -765,7 +766,6 @@ export default function BookingPage() {
                           <div>
                             <label htmlFor="preferred-time" className="text-xs font-semibold text-ink-600 mb-2 flex items-center gap-2">
                               <Clock className="w-3.5 h-3.5 text-ember-500" /> Preferred start time
-                              <span className="text-ink-400 font-normal">(optional)</span>
                             </label>
                             <div className="relative">
                               <select
@@ -775,7 +775,7 @@ export default function BookingPage() {
                                 disabled={sameDayClosed}
                                 className={`input-field appearance-none pr-10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${data.preferredTime ? 'border-emerald-500' : ''}`}>
                                 <option value="">
-                                  {sameDayClosed ? 'No slots available today' : 'Any available time'}
+                                  {sameDayClosed ? 'No slots available today' : 'Select a time'}
                                 </option>
                                 {availableTimeSlots.map(t => (
                                   <option key={t} value={t}>{formatTime12h(t)}</option>
